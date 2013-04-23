@@ -15,11 +15,11 @@ comandosOk=()
 for c in ${comandos[@]}; do
 	f="${BINDIR}/$c"
 	if [ ! -f $f ]; then
-		comandosFaltantes=(${comandosFaltantes[@]} $c)
+		comandosFaltantes+=($c)
 	elif [ ! -x $f ]; then
-		comandosNoEjecutables=(${comandosNoEjecutables[@]} $c)
+		comandosNoEjecutables+=($c)
 	else
-		comandosOK+=(${comandosOK[@]} $c)
+		comandosOK+=($c)
 	fi
 done
 
@@ -46,7 +46,7 @@ elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 				echo OK: $c >&2
 			else
 				echo KO: $c >&2
-				bad=(${bad[@]} $c)
+				bad+=($c)
 			fi
 		done
 		if [ "${bad}x" != "x" ]; then
