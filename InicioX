@@ -1,39 +1,44 @@
 #! /bin/bash
 
-# DUMMY: CAMBIAR CUANDO PUEDA TRAERLOS
+# TODO: CAMBIAR CUANDO PUEDA TRAERLOS
 BINDIR=`pwd`
 LOGFILE=log
 
+#### Inicialización de log
+
 echo 'Comando InicioX Inicio de Ejecución' >> ${LOGFILE}
 
-# comandos='InicioX'
-comandos=('InicioX' 'foo' 'bar')
+#### Verificación de instalación
+## Verificación de comandos
+comandos=('InicioX' 'DetectaX' 'foo' 'bar')
 comandosFaltantes=()
 comandosNoEjecutables=()
 comandosOk=()
 
 for c in ${comandos[@]}; do
 	f="${BINDIR}/$c"
+	a=($c)
 	if [ ! -f $f ]; then
-		comandosFaltantes+=($c)
+		comandosFaltantes+=$a
 	elif [ ! -x $f ]; then
-		comandosNoEjecutables+=($c)
+		comandosNoEjecutables+=$a
 	else
-		comandosOK+=($c)
+		comandosOK+=$a
 	fi
 done
-
+## Reporte de situación
 echo "Comandos registrados:" >&2
 echo ${comandos[@]} >&2
 if [ "${comandosNoEjecutables}x" != 'x' ]; then
 	echo "Comandos no ejecutables:" >&2
 	echo ${comandosNoEjecutables[@]} >&2
 fi
-
+# Comandos faltantes
 if [ "${comandosFaltantes}x" != 'x' ]; then
 	echo "Faltan los siguientes comandos, no se puede continuar:" >&2
 	echo ${comandosFaltantes[@]} >&2
-	return 1
+	exit 1
+# Arreglo de permisos
 elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 	echo "Desea hacerlos ejecutables? (s/N)" >&2
 	read ans
@@ -52,11 +57,27 @@ elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 		if [ "${bad}x" != "x" ]; then
 			echo "No se pueden hacer ejecutables los siguientes comandos:" >&2
 			echo ${bad[@]} >&2
-			return 3
+			exit 3
 		fi
 	else
-		return 2
+		exit 2
 	fi
 fi
-return 0
+
+####TODO: Verificar archivos de configuración
+
+####TODO: Fallar si el entorno está inicializado
+
+#### Exporto variables de entorno
+PATH+="${BINDIR}:"
+export PATH
+#TODO: otros directorios
+
+#### TODO: CANLOOP, TESPERA
+#### Ejecución de DetectaX
+echo "Desea efectuar la activación de DetectaX? (S/n)"
+read ans
+if [ "${ans}x" == sx -o "${ans}x" == Sx ]; then
+	DetectaX
+fi
 
