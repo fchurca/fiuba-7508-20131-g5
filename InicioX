@@ -1,0 +1,61 @@
+#! /bin/bash
+
+# DUMMY: CAMBIAR CUANDO PUEDA TRAERLOS
+BINDIR=`pwd`
+LOGFILE=log
+
+echo 'Comando InicioX Inicio de Ejecución' >> ${LOGFILE}
+
+# comandos='InicioX'
+comandos='InicioX foo bar'
+comandosFaltantes=
+comandosNoEjecutables=
+comandosOk=
+
+for c in $comandos; do
+	f="${BINDIR}/$c"
+	if [ ! -f $f ]; then
+		comandosFaltantes+="$c "
+	elif [ ! -x $f ]; then
+		comandosNoEjecutables+="$c "
+	else
+		comandosOK+="$c "
+	fi
+done
+
+echo "Comandos registrados:	${comandos}" >&2
+if [ "${comandosNoEjecutables}x" != 'x' ]; then
+	echo "Comandos no ejecutables:" >&2
+	echo "${comandosNoEjecutables}" >&2
+fi
+
+if [ "${comandosFaltantes}x" != 'x' ]; then
+	echo "Faltan los siguientes comandos, no se puede continuar:" >&2
+	echo ${comandosFaltantes} >&2
+	return 1
+elif [ "${comandosNoEjecutables}x" != 'x' ]; then
+	echo "Desea hacerlos ejecutables? (s/N)" >&2
+	read ans
+	if [ "${ans}x" == sx -o "${ans}x" == Sx ]; then
+		echo Cambiando permisos... >&2
+		bad=
+		for c in $comandosNoEjecutables; do
+			f="${BINDIR}/$c"
+			if chmod gu+x $f 2>/dev/null; then
+				echo OK: $c >&2
+			else
+				echo KO: $c >&2
+				bad+="$c "
+			fi
+		done
+		if [ "${bad}x" != "x" ]; then
+			echo "No se pueden hacer ejecutables los siguientes comandos:" >&2
+			echo ${bad} >&2
+			return 3
+		fi
+	else
+		return 2
+	fi
+fi
+return 0
+
