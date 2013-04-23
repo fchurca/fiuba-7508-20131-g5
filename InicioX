@@ -24,21 +24,15 @@ for c in ${comandos[@]}; do
 done
 
 echo "Comandos registrados:" >&2
-	for e in ${comandos[@]}; do
-		echo $e >&2
-	done
+echo ${comandos[@]} >&2
 if [ "${comandosNoEjecutables}x" != 'x' ]; then
 	echo "Comandos no ejecutables:" >&2
-	for e in ${comandosNoEjecutables[@]}; do
-		echo $e >&2
-	done
+	echo ${comandosNoEjecutables[@]} >&2
 fi
 
 if [ "${comandosFaltantes}x" != 'x' ]; then
 	echo "Faltan los siguientes comandos, no se puede continuar:" >&2
-	for e in ${comandosFaltantes[@]}; do
-		echo $e >&2
-	done
+	echo ${comandosFaltantes[@]} >&2
 	return 1
 elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 	echo "Desea hacerlos ejecutables? (s/N)" >&2
@@ -57,9 +51,7 @@ elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 		done
 		if [ "${bad}x" != "x" ]; then
 			echo "No se pueden hacer ejecutables los siguientes comandos:" >&2
-			for e in ${bad[@]}; do
-				echo $e >&2
-			done
+			echo ${bad[@]} >&2
 			return 3
 		fi
 	else
