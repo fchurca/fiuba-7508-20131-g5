@@ -1,7 +1,9 @@
 #! /bin/bash
 
 # TODO: CAMBIAR CUANDO PUEDA TRAERLOS
+MAECONF="${HOME}/7508-20131-g5"
 BINDIR=`pwd`
+CONFDIR=${BINDIR}
 LOGFILE=log
 
 #### Inicialización de log
@@ -17,13 +19,12 @@ comandosOk=()
 
 for c in ${comandos[@]}; do
 	f="${BINDIR}/$c"
-	a=($c)
 	if [ ! -f $f ]; then
-		comandosFaltantes+=$a
+		comandosFaltantes+=($c)
 	elif [ ! -x $f ]; then
-		comandosNoEjecutables+=$a
+		comandosNoEjecutables+=($c)
 	else
-		comandosOK+=$a
+		comandosOK+=($c)
 	fi
 done
 ## Reporte de situación
