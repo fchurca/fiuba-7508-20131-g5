@@ -1,13 +1,26 @@
 #! /bin/bash
 
+#! Desde acá loguear a stderr
 # TODO: CAMBIAR CUANDO PUEDA TRAERLOS
-MAECONF="${HOME}/7508-20131-g5"
-BINDIR=`pwd`
-CONFDIR=${BINDIR}
-LOGFILE=log
+# grupo="${HOME}/7508-20131-g5" # real
+grupo=`pwd` # debug
+CONFDIR=${grupo}/conf
+BINDIR=${grupo}/bin
+MAEDIR=${grupo}/mae
+ARRIDIR=${grupo}/incoming
+ACEPDIR=${grupo}/ok
+RECHDIR=${grupo}/ko
+PROCDIR=${grupo}/proc
+REPODIR=${grupo}/repo
+LOGDIR=${grupo}/log
+LOGFILE=${LOGDIR}/log
+
+# Si no se pudo traer alguna de las variables, pinchar catastróficamente (logueando a stderr)
 
 #### Inicialización de log
-
+# TODO: BUSCAR LOG; SI NO ESTÁ CREARLO; SI NO SE PUEDE CREAR FALLAR
+#! Si está, pasar a log
+# (función log que loguee $1 a logfile?)
 echo 'Comando InicioX Inicio de Ejecución' >> ${LOGFILE}
 
 #### Verificación de instalación
@@ -65,9 +78,16 @@ elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 	fi
 fi
 
-####TODO: Verificar archivos de configuración
+####TODO: Verificar archivos maestros
+# Existan legibles
+
+####TODO: Verificar tablas de configuración
+# Existan legibles
 
 ####TODO: Fallar si el entorno está inicializado
+# lockfile? ${grupo}/lock
+#  Si no existe, crearlo, borrarlo al final.
+#  Si existe, fallar. Sugerir borrar a mano.
 
 #### Exporto variables de entorno
 PATH+="${BINDIR}:"
