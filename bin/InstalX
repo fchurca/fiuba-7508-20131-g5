@@ -1,0 +1,295 @@
+### VARIABLES ###
+
+INSTALXCONF=InstalX.conf
+INSTALXLOG=InstalX.log
+MAINDIR=$PWD/grupo05
+CONFDIR=$PWD/grupo05/conf
+BINDIR=$MAINDIR/bin
+MAEDIR=$MAINDIR/mae
+ARRIDIR=$MAINDIR/arribos
+ACEPDIR=$MAINDIR/aceptados
+RECHDIR=$MAINDIR/rechazados
+PROCDIR=$MAINDIR/procesados
+REPODIR=$MAINDIR/reportes
+LOGDIR=$MAINDIR/log
+LOGEXT=.log
+DATASIZE=100
+LOGSIZE=400
+
+
+#######################################################
+
+
+### FUNCIONES ###
+
+#Listar archivos dentro de un directorio
+listFiles() {
+	dir=$1
+	if [ -n "$dir" ]
+	then
+		if [ -d "$dir" ]
+		then
+			ls "$dir"
+		fi
+	fi
+}
+
+#Mostar los datos de la instalación previa
+printPreviousInstalationData() {
+	echo 'TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05'
+	echo "Librería del sistema: $CONFDIR"
+	listFiles "$CONFDIR"
+	echo "Ejecutables: $BINDIR"
+	listFiles "$BINDIR"
+	echo "Archivos maestros: $MAEDIR"
+	listFiles "$MAEDIR"
+	echo "Directorio de arribo de archivos externos: $ARRIDIR"
+	echo "Archivos externos aceptados: $ACEPDIR"
+	echo "Archivos externos rechazados: $RECHDIR"
+	echo "Archivos procesados: $PROCDIR"
+	echo "Reportes de salida: $REPODIR"
+	echo "Logs de auditoría del sistema: $LOGDIR/<comando>$LOGEXT"
+	echo "Estado de la instalación: $1"
+}
+
+#Mostar los datos de la instalación
+printInstalationData() {
+	echo 'TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05'
+	echo "Librería del sistema: $CONFDIR"
+	echo "Ejecutables: $BINDIR"
+	echo "Archivos maestros: $MAEDIR"
+	echo "Directorio de arribo de archivos externos: $ARRIDIR"
+	echo "Espacio mínimo libre para arribos: $DATASIZE Mb"
+	echo "Archivos externos aceptados: $ACEPDIR"
+	echo "Archivos externos rechazados: $RECHDIR"
+	echo "Archivos procesados: $PROCDIR"
+	echo "Reportes de salida: $REPODIR"
+	echo "Logs de auditoría del sistema: $LOGDIR/<comando>$LOGEXT"
+	echo "Tamaño máximo para los archivos de log del sistema: $LOGSIZE Kb"
+	echo "Estado de la instalación: LISTA"
+}
+
+#Obtener respuesta Sí o No
+getYesOrNoAnswer() {
+	answer=
+	while [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]
+	do
+		read answer
+		answer=$(echo $answer | tr [:upper:] [:lower:])
+	done
+}
+
+#Términos y condiciones
+termsAndConditions() {
+	echo 'TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05
+A T E N C I O N: Al instalar TP SO7508 Primer Cuatrimestre 2013 UD. expresa aceptar los términos y condiciones del "ACUERDO DE LICENCIA DE SOFTWARE" incluido en este paquete.
+¿Acepta? Si - No'
+	getYesOrNoAnswer
+}
+
+#Verificar que Perl esté instalado
+verifyPerlIsInstalled() {
+	local installed=1
+	local dontPrint=$(perl -v)
+	local returnCode=$?
+	if [ $returnCode -ne 0 ]
+	then
+		installed=0
+	else
+		version=$(perl -v | grep 'v.* ')
+		version=${version#*v}
+		version=${version%% *}
+		versionForComp=${version%%.*}
+		if [ $versionForComp -lt 5 ]
+		then
+			installed=0
+		fi
+	fi
+	if [ $installed -eq 0 ]
+	then
+		echo 'TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05
+Para instalar el TP es necesario contar con Perl 5 o superior instalado. Efectúesu instalación e inténtelo nuevamente.
+Proceso de instalación cancelado.'
+		return 1
+	else
+		echo "TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05
+Perl Versión: $version"
+		return 0
+	fi
+}
+
+#Definir espacio mínimo de disco requerido
+defineMinimumDiskSpace() {
+	local end=0
+	echo "Defina el espacio mínimo libre para el arribo de archivos externos en Mbytes ($DATASIZE):"
+	while [ $end -eq 0 ]
+	do
+		read DATASIZE
+		local size=$(df -B 1MB --total | grep 'total' | awk {'print $2'})
+		if [ $DATASIZE -gt $size ]
+		then
+			echo "Insuficiente espacio en disco.
+Espacio disponible: $size Mb
+Espacio requerido $DATASIZE Mb
+Cancele la instalación e intentelo más tarde o vuelva a intentarlo con otro valor."
+		else
+			end=1
+		fi
+	done
+}
+
+#Proceso completo de configuración de la instalación
+installationConfiguration() {
+	echo "Defina el directorio de instalación de los ejecutables ($BINDIR):"
+	read BINDIR
+	BINDIR=$MAINDIR/$BINDIR
+	echo "Defina el directorio de instalación de los archivos maestros ($MAEDIR):"
+	read MAEDIR
+	MAEDIR=$MAINDIR/$MAEDIR
+	echo "Defina el directorio de arribo de archivos externos ($ARRIDIR):"
+	read ARRIDIR
+	ARRIDIR=$MAINDIR/$ARRIDIR
+	defineMinimumDiskSpace
+	echo "Defina el directorio de grabación de los archivos externos rechazados ($RECHDIR):"
+	read RECHDIR
+	RECHDIR=$MAINDIR/$RECHDIR
+	echo "Defina el directorio de grabación de los archivos externos aceptados ($ACEPDIR):"
+	read ACEPDIR
+	ACEPDIR=$MAINDIR/$ACEPDIR
+	echo "Defina el directorio de grabación de los archivos procesados ($PROCDIR):"
+	read PROCDIR
+	PROCDIR=$MAINDIR/$PROCDIR
+	echo "Defina el directorio de grabación de los reportes de salida ($REPODIR):"
+	read REPODIR
+	REPODIR=$MAINDIR/$REPODIR
+	echo "Defina el directorio de logs ($LOGDIR):"
+	read LOGDIR
+	LOGDIR=$MAINDIR/$LOGDIR
+	echo "Defina la extensión para los archivos de log ($LOGEXT):"
+	read LOGEXT
+	echo "Defina el tamaño máximo para los archivos $LOGEXT en Kbytes ($LOGSIZE):"
+	read LOGSIZE
+}
+
+#Reemplazar si existe el dato de configuración sino grabarlo
+findReplaceAndWrite() {
+	local day=$(date +%d)
+	local month=$(date +%m)
+	local year=$(date +%Y)
+	local hour=$(date +%H)
+	local minutes=$(date +%M)
+	lineToWrite="$1=$2=$3=$day/$month/$year $hour:$minutes"
+	exists=1
+	if [ -f "$CONFDIR/$INSTALXCONF" ]
+	then
+		dontPrint=$(grep "$1" "$CONFDIR/$INSTALXCONF")
+		exists=$?
+	fi
+	if [ $exists -eq 0 ]
+	then
+		sed -i "s-$1.*-$lineToWrite-" "$CONFDIR/$INSTALXCONF"
+	else
+		echo "$lineToWrite" >> "$CONFDIR/$INSTALXCONF"
+	fi
+}
+
+#Escribir los datos de la configuración del sistema
+writeSystemConfiguration() { ###CAMBIAR LOGIN DEL USUARIO
+	login=prueba01
+	findReplaceAndWrite "GRUPO" "$MAINDIR" "$login"
+	findReplaceAndWrite "CONFDIR" "$CONFDIR" "$login"
+	findReplaceAndWrite "BINDIR" "$BINDIR" "$login"
+	findReplaceAndWrite "MAEDIR" "$MAEDIR" "$login"
+	findReplaceAndWrite "ARRIDIR" "$ARRIDIR" "$login"
+	findReplaceAndWrite "ACEPDIR" "$ACEPDIR" "$login"
+	findReplaceAndWrite "RECHDIR" "$RECHDIR" "$login"
+	findReplaceAndWrite "PROCDIR" "$PROCDIR" "$login"
+	findReplaceAndWrite "REPODIR" "$REPODIR" "$login"
+	findReplaceAndWrite "LOGDIR" "$LOGDIR" "$login"
+	findReplaceAndWrite "LOGEXT" "$LOGEXT" "$login"
+	findReplaceAndWrite "LOGSIZE" "$LOGSIZE" "$login"
+	findReplaceAndWrite "DATASIZE" "$DATASIZE" "$login"
+}
+
+#Proceso de instalación
+installationProcess() {
+	echo 'Creando estructuras de directorio. . . .'
+	mkdir -p "$CONFDIR"
+	mkdir -p "$BINDIR"
+	mkdir -p "$MAEDIR"
+	mkdir -p "$ARRIDIR"
+	mkdir -p "$RECHDIR"
+	mkdir -p "$ACEPDIR"
+	mkdir -p "$PROCDIR"
+	mkdir -p "$LOGDIR"
+	mkdir -p "$REPODIR"
+	echo 'Instalando archivos maestros'
+	#MOVER ARCHIVOS MAESTROS A MAEDIR
+	echo 'Instalando tablas de configuración'
+	#MOVER TABLAS DE SEPARADORES Y DE CAMPOS A CONFDIR
+	echo 'Instalando programas y funciones'
+	#MOVER EJECUTABLES Y FUNCIONES A BINDIR
+	echo 'Actualizando la configuración del sistema'
+	writeSystemConfiguration
+	echo 'Instalación concluida'
+}
+
+
+#######################################################
+
+
+### BLOQUE PRINCIPAL ###
+
+echo 'Inicio de ejecución'
+#GRABAR EN InstalX.log
+echo "Log del comando InstalX: $CONFDIR/$INSTALXLOG"
+#GRABAR EN InstalX.log
+echo "Directorio de configuración: $CONFDIR"
+#GRABAR EN InstalX.log
+
+#Detectar si ya fue instalado.
+if [ -f "$INSTALXCONF" ] #EN CUALQUIER PARTE DEL SISTEMA?
+then
+	echo 'El Fichero ya existe'
+	#LEVANTAR ARCHIVO DE CONFIGURACION Y REVISARLO
+	#result=$(grep -i "GRUPO" "grupo05/conf/InstalX.conf"); echo $?
+	printPreviousInstalationData "COMPLETA"
+else
+	termsAndConditions
+	if [ "$answer" = "si" ]
+	then
+		verifyPerlIsInstalled
+		perlIsInstalled=$?
+		if [ $perlIsInstalled -eq 0 ]
+		then
+			configurated=0
+			while [ $configurated -eq 0 ]
+			do
+				installationConfiguration
+				clear
+				printInstalationData
+				echo '¿Desea continuar con la instalación? Si - No'
+				getYesOrNoAnswer
+				if [ "$answer" = "si" ]
+				then
+					configurated=1
+				elif [ "$answer" = "no" ]
+				then
+					clear
+				fi
+			done
+			echo 'Iniciando Instalación. ¿Está Ud. seguro? Si - No'
+			getYesOrNoAnswer
+			if [ "$answer" = "si" ]
+			then
+				installationProcess
+#			else
+#				#SALIR
+			fi
+#		else
+#			#SALIR
+		fi
+#	else
+#		#SALIR
+	fi
+fi
