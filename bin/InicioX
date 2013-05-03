@@ -1,31 +1,84 @@
 #! /bin/bash
 
-#! Desde acá loguear a stderr
-# TODO: CAMBIAR CUANDO PUEDA TRAERLOS
-# grupo="${HOME}/7508-20131-g5" # real
-grupo=`pwd` # debug
-CONFDIR=${grupo}/conf
-BINDIR=${grupo}/bin
-MAEDIR=${grupo}/mae
-ARRIDIR=${grupo}/incoming
-ACEPDIR=${grupo}/ok
-RECHDIR=${grupo}/ko
-PROCDIR=${grupo}/proc
-REPODIR=${grupo}/repo
-LOGDIR=${grupo}/log
-LOGFILE=${LOGDIR}/log
+#TODO: VER CÓMO SE PUEDE HACER CON FIFOs
+function == {
+if [ ${CONTROLX_TMPFILE}x == x ]; then
+	CONTROLX_TMPFILE=`mktemp`
+fi
+echo $1 >> ${CONTROLX_TMPFILE}
+}
+function =! {
+source ${CONTROLX_TMPFILE}
+rm ${CONTROLX_TMPFILE}
+CONTROLX_TMPFILE=
+}
 
-# Si no se pudo traer alguna de las variables, pinchar catastróficamente (logueando a stderr)
+#! Desde acá loguear a stderr
+if [ "$1"x == -dx ]; then
+	grupo=`pwd` # debug
+else
+	grupo="${HOME}/7508-20131-g5" # real
+fi
+CONFDIR=${grupo}/conf
+CONFFILE=${CONFDIR}/InstalX.conf
+if [ ! -f ${CONFFILE} ]; then
+	echo "Falta el archivo de configuración, no se puede continuar:" >&2
+	echo ${CONFFILE} >&2
+	exit 1;
+fi
+
+confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR')
+confvars=${confdirs[@]}
+confvars+=('LOGEXT' 'LOGSIZE' 'DATASIZE')
+badvars=()
+for var in ${confvars[@]}; do
+	== `grep "^${var}=" ${CONFFILE} | cut -d= -f1,2`
+	== "if [ \${${var}}x == x ]; then badvars+=('${var}'); fi"
+done
+=!
+
+if [ ${badvars}x == x ]; then
+	baddirs=()
+	for dir in ${confdirs[@]}; do
+		== "if [ ! -d \${${dir}} -o ! -r \${${dir}} ]; then baddirs+=('${dir}'); fi"
+	done
+	=!
+	if [ ${baddirs}x != x ]; then
+		echo "Los siguientes directorios no están accesibles, no se puede continuar:" >&2
+		echo "${baddirs[@]}" >&2
+		exit 1
+	fi
+else
+	echo "Las siguientes variables no están definidas, no se puede continuar:" >&2
+	echo "${badvars[@]}" >&2
+	exit 1
+fi
 
 #### Inicialización de log
-# TODO: BUSCAR LOG; SI NO ESTÁ CREARLO; SI NO SE PUEDE CREAR FALLAR
-#! Si está, pasar a log
+LOGFILE="${LOGDIR}/InstalX.${LOGEXT}"
+if [ -f ${LOGFILE} -a ! -w ${LOGFILE} ]; then
+	echo "No se puede escribir en el archivo de log, no se puede continuar:" >&2
+	echo ${LOGFILE} >&2
+	exit 1;
+fi
+if [ ! -f ${LOGFILE} ]; then
+	echo "Falta el archivo de log, creando:" >&2
+	echo ${LOGFILE} >&2
+	touch ${LOGFILE}
+	if [ ! -f ${LOGFILE} ]; then
+		echo "No se puede crear el archivo de log, no se puede continuar" >&2
+		exit 1;
+	fi
+	echo "Archivo de log creado exitosamente, redirigiendo salida" >&2
+fi
+
+#TODO: Si está, pasar stderr a log
 # (función log que loguee $1 a logfile?)
 echo 'Comando InicioX Inicio de Ejecución' >> ${LOGFILE}
 
 #### Verificación de instalación
 ## Verificación de comandos
-comandos=('InicioX' 'DetectaX' 'foo' 'bar')
+comandos=('InicioX' 'DetectaX')
 comandosFaltantes=()
 comandosNoEjecutables=()
 comandosOk=()
@@ -52,7 +105,7 @@ if [ "${comandosFaltantes}x" != 'x' ]; then
 	echo "Faltan los siguientes comandos, no se puede continuar:" >&2
 	echo ${comandosFaltantes[@]} >&2
 	exit 1
-# Arreglo de permisos
+	# Arreglo de permisos
 elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 	echo "Desea hacerlos ejecutables? (s/N)" >&2
 	read ans
@@ -90,11 +143,18 @@ fi
 #  Si existe, fallar. Sugerir borrar a mano.
 
 #### Exporto variables de entorno
-PATH+="${BINDIR}:"
-export PATH
-#TODO: otros directorios
+#### TODO: Traer CANLOOP, TESPERA
+confvars+=('CANLOOP' 'ESPERA' 'PATH')
+for var in ${confvars[@]}; do
+	== "export ${var}"
+done
+=!
 
-#### TODO: CANLOOP, TESPERA
+for var in ${confvars[@]}; do
+	== "echo ${var}=\${${var}}"
+done
+=!
+
 #### Ejecución de DetectaX
 echo "Desea efectuar la activación de DetectaX? (S/n)"
 read ans
