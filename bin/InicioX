@@ -143,14 +143,15 @@ fi
 #  Si existe, fallar. Sugerir borrar a mano.
 
 #### Exporto variables de entorno
-#### TODO: Traer CANLOOP, TESPERA
-confvars+=('CANLOOP' 'ESPERA' 'PATH')
+#### TODO: Traer CANLOOP, TESPERA más lindo
+echo "CANLOOP? (CHAR)"
+read CANLOOP
+echo "TESPERA? (INT)"
+read TESPERA
+
+confvars+=('CANLOOP' 'TESPERA' 'PATH')
 for var in ${confvars[@]}; do
 	== "export ${var}"
-done
-=!
-
-for var in ${confvars[@]}; do
 	== "echo ${var}=\${${var}}"
 done
 =!
