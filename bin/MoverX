@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 #! /bin/bash
 
-=======
->>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 # MoverX sirve para mover un archivo de una dirección a otra
 # Tiene la forma:
 #    	MoverX <archivo> <origen> <destino>
@@ -16,7 +13,6 @@ if [ "$origen" != "$destino" ];
 then	
 	#Chequeo que los directorios existan
 	if [ ! -d "$origen" ]; then
-<<<<<<< HEAD
 		echo "El directorio $origen no existe."
 		exit 1
 	elif [ ! -d "$destino" ]; then
@@ -25,21 +21,10 @@ then
 	fi
 	#Chequeo que el archivo no sea duplicado
 	if [ -f "$archivo_en_destino" ]; then
-=======
-		echo "El directorio $origen No existe"
-		exit 1
-	elif [ ! -d "$destino" ]; then
-		echo "El directorio $destino No existe"
-		exit 1
-	fi
-	#Chequeo que el archivo no sea duplicado
-	if [ -e "$archivo_en_destino" ]; then
->>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 		#Chequeo si existe el directorio dup y sino lo creo
 		if [ ! -d "$carpeta_dup" ]; then
 			mkdir "$carpeta_dup"
 		fi
-<<<<<<< HEAD
 		files=$(ls "$carpeta_dup")
 		extension=0
 		for file in $files
@@ -57,17 +42,10 @@ then
 		fi
 		mv "$origen/$archivo" "$carpeta_dup"
 		mv "$carpeta_dup/$archivo" "$carpeta_dup/$archivo.$extension"
-=======
-		mv "$origen/$archivo" "$carpeta_dup"
->>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 	else	
 		mv "$origen/$archivo" "$destino"
 	fi
 else
-<<<<<<< HEAD
  	echo "El directorio de origen y el de destino son iguales."
 	exit 1
-=======
- 	echo "El origen y el destion son iguales"
->>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 fi

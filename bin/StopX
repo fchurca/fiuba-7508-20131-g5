@@ -1,15 +1,9 @@
-<<<<<<< HEAD
 #! /bin/bash
 
 #		StopX
 # Se asegura de detener un proceso que se esté ejecutando
 # y de dar error si el proceso no estaba ejecutándose.
 
-=======
-#		StopX
-# Se asegura de detener un proceso que se este ejecutando
-# y de dar error por consola si el proceso no estaba ejecutandose
->>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 proceso=$1
 cuenta=`ps auxw | grep proceso | grep -v grep`
 
@@ -17,11 +11,7 @@ if [ -z "${cuenta}" ]; then
 	pid=`pidof $proceso`
 	kill $pid
 else
-<<<<<<< HEAD
 	echo "Error: El proceso "$proceso" no se está ejecutando."
-=======
-	echo "Error: El proceso "$proceso" no se esta ejecutando."
->>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 	exit 1
 fi
 exit 0
