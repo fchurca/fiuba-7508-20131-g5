@@ -6,18 +6,18 @@ BINDIR=`pwd`
 function determinarSeparadores
 {
 	#determinarSeparadores $pais $codigo 
-	local path='CONFDIR/T1.tab'
-	sepCampo=`grep "^${pais}-${codigo}-[^-]*-[^-]*$" "${BINDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)/\2/"`
-	sepDec=`grep "^${pais}-${codigo}-[^-]*-[^-]*$" "${BINDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)/\3/"`
+	local path='T1.tab'
+	sepCampo=`grep "^${pais}-${codigo}-[^-]*-[^-]*$" "${CONFDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)/\2/"`
+	sepDec=`grep "^${pais}-${codigo}-[^-]*-[^-]*$" "${CONFDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)/\3/"`
 }
 
 # Funcion que obtiene los campos de cada registro
 function obtenerCampos
 {
-	local path='CONFDIR/T2.tab'
+	local path='T2.tab'
 	local CamposInfo=()
 	#Obtengo cada uno de los campos correspondientes al pais y codigo y los ordeno por orden de aparicion
-	CamposInfo+=`grep "^${pais}-${codigo}-[^-]*-[^-]*-[^-]*$" "${BINDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)-\([^-]*\)/\2-\3-\4/"`
+	CamposInfo+=`grep "^${pais}-${codigo}-[^-]*-[^-]*-[^-]*$" "${CONFDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)-\([^-]*\)/\2-\3-\4/"`
 	camposInfoOrdenados=`for c in ${CamposInfo[@]}; do echo "$c"; done | sort -t\- -n -k 2,2` 
 }
 
@@ -161,36 +161,18 @@ function inicializarArray
 
 #Main
 
-#Chequeo que el llamado venga con un argumento
-if [ $# -ne 2 ]; then
-	echo "Se necesita los parametros ACEPDIR Y PROCDIR"
-	echo "Uso: $0 <ACEPDIR> <PROCDIR>"
-	exit
-fi
-
-acepdir=$1
-procdir=$2
-
-#Chequeo que los directorios existan
-if [ ! -e $acepdir ]; then
-	echo "El directorio $acepdir No existe"
-	exit
-elif [ ! -e $procdir ]; then
-	echo "El directorio $procdir No existe"
-	exit
-fi
 
 #Iniciando el log
 echo iniciando log
 
-if [ "$(ls -A $acepdir)" ]; then
+if [ "$(ls -A $ACEPDIR)" ]; then
 #Proceso cada uno de los archivos del directorio
-for arch in $acepdir/*
+for arch in $ACEPDIR/*
 	do
 		#le saco hasta la ultima /
 		aceptado=${arch##*/}
 		existente="False"
-		for proc in $procdir/*
+		for proc in $PROCDIR/*
 			do
 				procesado=${proc##*/}
 				if [ "$procesado" == "$aceptado" ];then
@@ -203,7 +185,7 @@ for arch in $acepdir/*
 		if [ $existente == "True" ];then
 #Muevo archivo rechazado
 			echo "Archivo $aceptado ya procesado.Mover a rechdir"
-			mv $arch "./RECHDIR"
+			mv $arch $RECHDIR
 			echo "grabar log"
 		else 
 #Procesamiento de un archivo aceptado
@@ -249,7 +231,7 @@ for arch in $acepdir/*
 			done < $arch
 			echo "registrosInput=$registrosInput registrosOutput=$registrosOutput"
 			echo ""			
-			mv $arch $procdir
+			mv $arch $PROCDIR
 		fi
 
 

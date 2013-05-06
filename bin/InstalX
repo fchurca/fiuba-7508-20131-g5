@@ -1,9 +1,12 @@
+#! /bin/bash
+
 ### VARIABLES ###
 
 INSTALXCONF=InstalX.conf
 INSTALXLOG=InstalX.log
-MAINDIR=$PWD/grupo05
-CONFDIR=$PWD/grupo05/conf
+CURRENTDIR=$PWD
+MAINDIR=${HOME}/7508-20131-g5
+CONFDIR=$MAINDIR/conf
 BINDIR=$MAINDIR/bin
 MAEDIR=$MAINDIR/mae
 ARRIDIR=$MAINDIR/arribos
@@ -113,7 +116,7 @@ Proceso de instalación cancelado.'
 		return 1
 	else
 		echo "TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05
-Perl Versión: $version"
+Perl versión: $version"
 		return 0
 	fi
 }
@@ -182,7 +185,7 @@ findReplaceAndWrite() {
 	exists=1
 	if [ -f "$CONFDIR/$INSTALXCONF" ]
 	then
-		dontPrint=$(grep "$1" "$CONFDIR/$INSTALXCONF")
+		grep -q "$1" "$CONFDIR/$INSTALXCONF"
 		exists=$?
 	fi
 	if [ $exists -eq 0 ]
@@ -224,11 +227,18 @@ installationProcess() {
 	mkdir -p "$LOGDIR"
 	mkdir -p "$REPODIR"
 	echo 'Instalando archivos maestros'
-	#MOVER ARCHIVOS MAESTROS A MAEDIR
+	source MoverX PPI.mae "$CURRENTDIR" "$MAEDIR"
+	source MoverX p-s.mae "$CURRENTDIR" "$MAEDIR"
 	echo 'Instalando tablas de configuración'
-	#MOVER TABLAS DE SEPARADORES Y DE CAMPOS A CONFDIR
+	source MoverX T2.tab "$CURRENTDIR" "$CONFDIR"
+	source MoverX T1.tab "$CURRENTDIR" "$CONFDIR"
 	echo 'Instalando programas y funciones'
-	#MOVER EJECUTABLES Y FUNCIONES A BINDIR
+	source MoverX InicioX "$CURRENTDIR" "$BINDIR"
+	source MoverX DetectaX "$CURRENTDIR" "$BINDIR"
+	source MoverX InterpreteX "$CURRENTDIR" "$BINDIR"
+	source MoverX StartX "$CURRENTDIR" "$BINDIR"
+	source MoverX StopX "$CURRENTDIR" "$BINDIR"
+	source MoverX MoverX "$CURRENTDIR" "$BINDIR"
 	echo 'Actualizando la configuración del sistema'
 	writeSystemConfiguration
 	echo 'Instalación concluida'
@@ -283,13 +293,7 @@ else
 			if [ "$answer" = "si" ]
 			then
 				installationProcess
-#			else
-#				#SALIR
 			fi
-#		else
-#			#SALIR
 		fi
-#	else
-#		#SALIR
 	fi
 fi

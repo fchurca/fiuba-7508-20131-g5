@@ -1,0 +1,51 @@
+#! /bin/bash
+
+# MoverX sirve para mover un archivo de una dirección a otra
+# Tiene la forma:
+#    	MoverX <archivo> <origen> <destino>
+
+archivo=$1
+origen=$2
+destino=$3
+archivo_en_destino="$destino/$archivo"
+carpeta_dup="$destino/dup"
+if [ "$origen" != "$destino" ];
+then	
+	#Chequeo que los directorios existan
+	if [ ! -d "$origen" ]; then
+		echo "El directorio $origen no existe."
+		exit 1
+	elif [ ! -d "$destino" ]; then
+		echo "El directorio $destino no existe."
+		exit 1
+	fi
+	#Chequeo que el archivo no sea duplicado
+	if [ -f "$archivo_en_destino" ]; then
+		#Chequeo si existe el directorio dup y sino lo creo
+		if [ ! -d "$carpeta_dup" ]; then
+			mkdir "$carpeta_dup"
+		fi
+		files=$(ls "$carpeta_dup")
+		extension=0
+		for file in $files
+		do
+			extension="${file##*.}"
+		done
+		extension=$(echo $extension | sed 's/^0*//')
+		((extension++))
+		if [ $extension -lt 10 ]
+		then
+			extension="00$extension"
+		elif [ $extension -lt 100 ]
+		then
+			extension="0$extension"
+		fi
+		mv "$origen/$archivo" "$carpeta_dup"
+		mv "$carpeta_dup/$archivo" "$carpeta_dup/$archivo.$extension"
+	else	
+		mv "$origen/$archivo" "$destino"
+	fi
+else
+ 	echo "El directorio de origen y el de destino son iguales."
+	exit 1
+fi
