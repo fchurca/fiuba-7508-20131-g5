@@ -1,8 +1,18 @@
+<<<<<<< HEAD
 #! /bin/bash
 
 ### VARIABLES ###
 
 CICLE=0
+=======
+### VARIABLES ###
+
+
+CANLOOP=10000
+CICLE=0
+TESPERA=60
+MINYEAR=2000
+>>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 
 
 #######################################################
@@ -28,7 +38,11 @@ processArridirFile() {
 		local untilYear="${untilSystem#*-}"
 		local year="${untilYear%%-*}"
 		local month="${untilYear#*-}"
+<<<<<<< HEAD
 		if [ \( $year -gt 2000 \) -a \( $year -le $(date +%Y) \) -a \( $month -ge 1 \) -a \( $month -le 12 \) ]
+=======
+		if [ \( $year -gt $MINYEAR \) -a \( $year -le $(date +%Y) \) -a \( $month -ge 1 \) -a \( $month -le 12 \) ]
+>>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 		then
 			if [ $year -eq $(date +%Y) ]
 			then
@@ -45,18 +59,30 @@ processArridirFile() {
 	fi
 	if [ $rejected -eq 1 ]
 	then
+<<<<<<< HEAD
 		source MoverX "$file" "$ARRIDIR" "$RECHDIR"
 		#GRABAR EN EL LOG
 	else
 		source MoverX "$file" "$ARRIDIR" "$ACEPDIR"
 		#GRABAR EN EL LOG
+=======
+		echo "$file: Rechazado."
+		#MOVER A RECHDIR
+	else
+		echo "$file: Aceptado."
+		#MOVER A ACEPDIR
+>>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 	fi
 }
 
 #Procesar un archivo de ACEPDIR
 processAcepdirFile() {
 	echo "InterpreteX"
+<<<<<<< HEAD
 	#source InterpreteX
+=======
+	#InterpreteX
+>>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 	#MOSTRAR PROCESS ID, ETC
 }
 

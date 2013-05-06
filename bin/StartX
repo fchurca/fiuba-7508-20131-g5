@@ -1,16 +1,30 @@
+<<<<<<< HEAD
 #! /bin/bash
 
 #		StartX
 #Chequea si el proceso está en ejecución. Si está en ejecución 
 #tira error y si no está en ejecución, lo corre.
+=======
+#		StartX
+#Chequea si el proceso esta en ejecución. Si esta en ejecución 
+#tira error y si no esta en ejecución, lo corre.
+>>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 
 proceso=$1
 
 if ps ax | grep -v grep | grep $proceso > /dev/null
 then
+<<<<<<< HEAD
 	echo "Error: El proceso $proceso ya se está ejecutando."
 	exit 1
 else
 	"$proceso" &
+=======
+	echo "El servicio $proceso esta ejecutandose"
+	exit 1
+else
+		echo "No lo encontro entonces lo ejecuta."
+		"$proceso" &
+>>>>>>> 154a02fc027ca7e795aa09b0f9c1f3131350d72f
 fi
 exit 0
