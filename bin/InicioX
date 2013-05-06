@@ -149,7 +149,8 @@ read CANLOOP
 echo "TESPERA? (INT)"
 read TESPERA
 
-confvars+=('CANLOOP' 'TESPERA' 'PATH')
+PATH+=":${BINDIR}"
+confvars+=('CANLOOP' 'TESPERA' 'PATH' 'CONFDIR' 'grupo')
 for var in ${confvars[@]}; do
 	== "export ${var}"
 	== "echo ${var}=\${${var}}"
