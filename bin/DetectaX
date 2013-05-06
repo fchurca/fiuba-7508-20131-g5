@@ -1,0 +1,95 @@
+### VARIABLES ###
+
+
+CANLOOP=10000
+CICLE=0
+TESPERA=60
+MINYEAR=2000
+
+
+#######################################################
+
+
+### FUNCIONES ###
+
+#Procesar un archivo de ARRIDIR.
+processArridirFile() {
+	local rejected=0;
+	if [ -f "$1" ]
+	then
+		local file="${1##*/}"
+		local country="${file%%-*}"
+		local untilSystem="${file#*-}"
+		local system="${untilSystem%%-*}"
+		grep -q "$country-.*-$system" "$MAEDIR/p-s.mae"
+		local returnCode=$?
+		if [ $returnCode -ne 0 ]
+		then
+			rejected=1
+		fi
+		local untilYear="${untilSystem#*-}"
+		local year="${untilYear%%-*}"
+		local month="${untilYear#*-}"
+		if [ \( $year -gt $MINYEAR \) -a \( $year -le $(date +%Y) \) -a \( $month -ge 1 \) -a \( $month -le 12 \) ]
+		then
+			if [ $year -eq $(date +%Y) ]
+			then
+				if [ $month -gt $(date +%m) ]
+				then
+					rejected=1
+				fi
+			fi
+		else
+			rejected=1
+		fi
+	else
+		rejected=1
+	fi
+	if [ $rejected -eq 1 ]
+	then
+		echo "$file: Rechazado."
+		#MOVER A RECHDIR
+	else
+		echo "$file: Aceptado."
+		#MOVER A ACEPDIR
+	fi
+}
+
+#Procesar un archivo de ACEPDIR
+processAcepdirFile() {
+	echo "InterpreteX"
+	#InterpreteX
+	#MOSTRAR PROCESS ID, ETC
+}
+
+
+#######################################################
+
+
+### BLOQUE PRINCIPAL ###
+
+#Detectar si existen archivos en ARRIDIR.
+while [ $CICLE -le $CANLOOP ]
+do
+	((CICLE++))
+	#GRABAR EN EL LOG NUMERO DE CICLO
+
+	if [ "$(ls -A "$ARRIDIR")" ]
+	then
+		files=$(ls "$ARRIDIR")
+		for file in $files
+		do
+			processArridirFile "$ARRIDIR/$file"
+		done
+	fi
+
+	if [ "$(ls -A "$ACEPDIR")" ]
+	then
+		files=$(ls "$ARRIDIR")
+		for file in $files
+		do
+			processAcepdirFile "$ACEPDIR/$file"
+		done
+	fi
+	sleep $TESPERA
+done

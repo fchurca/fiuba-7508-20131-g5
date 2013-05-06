@@ -1,0 +1,14 @@
+#		StopX
+# Se asegura de detener un proceso que se este ejecutando
+# y de dar error por consola si el proceso no estaba ejecutandose
+proceso=$1
+cuenta=`ps auxw | grep proceso | grep -v grep`
+
+if [ -z "${cuenta}" ]; then
+	pid=`pidof $proceso`
+	kill $pid
+else
+	echo "Error: El proceso "$proceso" no se esta ejecutando."
+	exit 1
+fi
+exit 0

@@ -1,0 +1,15 @@
+#		StartX
+#Chequea si el proceso esta en ejecución. Si esta en ejecución 
+#tira error y si no esta en ejecución, lo corre.
+
+proceso=$1
+
+if ps ax | grep -v grep | grep $proceso > /dev/null
+then
+	echo "El servicio $proceso esta ejecutandose"
+	exit 1
+else
+		echo "No lo encontro entonces lo ejecuta."
+		"$proceso" &
+fi
+exit 0
