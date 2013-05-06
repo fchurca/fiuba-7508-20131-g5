@@ -24,7 +24,7 @@ CONFFILE=${CONFDIR}/InstalX.conf
 if [ ! -f ${CONFFILE} ]; then
 	echo "Falta el archivo de configuración, no se puede continuar:" >&2
 	echo ${CONFFILE} >&2
-	exit 1;
+	return 1;
 fi
 
 confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR')
@@ -46,12 +46,12 @@ if [ ${badvars}x == x ]; then
 	if [ ${baddirs}x != x ]; then
 		echo "Los siguientes directorios no están accesibles, no se puede continuar:" >&2
 		echo "${baddirs[@]}" >&2
-		exit 1
+		return 1
 	fi
 else
 	echo "Las siguientes variables no están definidas, no se puede continuar:" >&2
 	echo "${badvars[@]}" >&2
-	exit 1
+	return 1
 fi
 
 #### Inicialización de log
@@ -59,7 +59,7 @@ LOGFILE="${LOGDIR}/InstalX.${LOGEXT}"
 if [ -f ${LOGFILE} -a ! -w ${LOGFILE} ]; then
 	echo "No se puede escribir en el archivo de log, no se puede continuar:" >&2
 	echo ${LOGFILE} >&2
-	exit 1;
+	return 1;
 fi
 if [ ! -f ${LOGFILE} ]; then
 	echo "Falta el archivo de log, creando:" >&2
@@ -67,7 +67,7 @@ if [ ! -f ${LOGFILE} ]; then
 	touch ${LOGFILE}
 	if [ ! -f ${LOGFILE} ]; then
 		echo "No se puede crear el archivo de log, no se puede continuar" >&2
-		exit 1;
+		return 1;
 	fi
 	echo "Archivo de log creado exitosamente, redirigiendo salida" >&2
 fi
@@ -104,7 +104,7 @@ fi
 if [ "${comandosFaltantes}x" != 'x' ]; then
 	echo "Faltan los siguientes comandos, no se puede continuar:" >&2
 	echo ${comandosFaltantes[@]} >&2
-	exit 1
+	return 1
 	# Arreglo de permisos
 elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 	echo "Desea hacerlos ejecutables? (s/N)" >&2
@@ -124,10 +124,10 @@ elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 		if [ "${bad}x" != "x" ]; then
 			echo "No se pueden hacer ejecutables los siguientes comandos:" >&2
 			echo ${bad[@]} >&2
-			exit 3
+			return 3
 		fi
 	else
-		exit 2
+		return 2
 	fi
 fi
 
