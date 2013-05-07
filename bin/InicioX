@@ -78,7 +78,7 @@ echo 'Comando InicioX Inicio de Ejecución' >> ${LOGFILE}
 
 #### Verificación de instalación
 ## Verificación de comandos
-comandos=('InicioX' 'DetectaX')
+comandos=('InicioX' 'DetectaX' 'StartX' 'StopX' 'InterpreteX' 'MoverX') # 'ReporteX' 'GlogX' 'VlogX'
 comandosFaltantes=()
 comandosNoEjecutables=()
 comandosOk=()
@@ -161,6 +161,6 @@ done
 echo "Desea efectuar la activación de DetectaX? (S/n)"
 read ans
 if [ "${ans}x" == sx -o "${ans}x" == Sx ]; then
-	DetectaX
+	StartX DetectaX
 fi
 

@@ -4,9 +4,9 @@
 #Chequea si el proceso está en ejecución. Si está en ejecución 
 #tira error y si no está en ejecución, lo corre.
 
-proceso=$1
+proceso=${BINDIR}/$1
 
-if ps ax | grep -v grep | grep $proceso > /dev/null
+if [ "`ps ax | grep -v grep | grep $proceso`"x != x ]
 then
 	echo "Error: El proceso $proceso ya se está ejecutando."
 	exit 1

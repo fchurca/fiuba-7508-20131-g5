@@ -5,10 +5,9 @@
 # y de dar error si el proceso no estaba ejecutándose.
 
 proceso=$1
-cuenta=`ps auxw | grep proceso | grep -v grep`
+pid="`ps ax | grep -v grep | grep ${proceso} | sed -r 's/^\s+(\S+)\s.*$/\1/'`"
 
-if [ -z "${cuenta}" ]; then
-	pid=`pidof $proceso`
+if [ "${pid}x" != x ]; then
 	kill $pid
 else
 	echo "Error: El proceso "$proceso" no se está ejecutando."
