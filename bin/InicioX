@@ -1,5 +1,7 @@
 #! /bin/bash
 
+########TODO: Documentar!
+
 #TODO: VER CÓMO SE PUEDE HACER CON FIFOs
 function == {
 if [ ${CONTROLX_TMPFILE}x == x ]; then
@@ -11,6 +13,42 @@ function =! {
 source ${CONTROLX_TMPFILE}
 rm ${CONTROLX_TMPFILE}
 CONTROLX_TMPFILE=
+}
+
+function GlogX {
+if [ $# -lt 2 ]; then
+	echo "GlogX: GlogX comando msg [lvl]" >&2
+	return 1
+fi
+if [ ${LOGFILE}x == x ]; then
+	LOGFILE="${LOGDIR}/$1.${LOGEXT}"
+	if [ -f ${LOGFILE} -a ! -w ${LOGFILE} ]; then
+		echo "No se puede escribir en el archivo de log, no se puede continuar:" >&2
+		echo ${LOGFILE} >&2
+		return 1;
+	fi
+	if [ ! -f ${LOGFILE} ]; then
+		echo "Falta el archivo de log, creando:" >&2
+		echo ${LOGFILE} >&2
+		touch ${LOGFILE}
+		if [ ! -f ${LOGFILE} ]; then
+			echo "No se puede crear el archivo de log, no se puede continuar" >&2
+			return 1;
+		fi
+	fi
+fi
+echo "`date -u`-`whoami`-$1-$3-$2" >> ${LOGFILE}
+}
+
+####TODO: FANCY!
+function VlogX {
+LOGFILE="${LOGDIR}/$1.${LOGEXT}"
+if [ ! -r ${LOGFILE} ]; then
+	echo "No se puede leer el archivo de log, no se puede continuar:" >&2
+	echo ${LOGFILE} >&2
+	return 1;
+fi
+cat ${LOGFILE}
 }
 
 #! Desde acá loguear a stderr
@@ -54,27 +92,9 @@ else
 	return 1
 fi
 
-#### Inicialización de log
-LOGFILE="${LOGDIR}/InstalX.${LOGEXT}"
-if [ -f ${LOGFILE} -a ! -w ${LOGFILE} ]; then
-	echo "No se puede escribir en el archivo de log, no se puede continuar:" >&2
-	echo ${LOGFILE} >&2
-	return 1;
-fi
-if [ ! -f ${LOGFILE} ]; then
-	echo "Falta el archivo de log, creando:" >&2
-	echo ${LOGFILE} >&2
-	touch ${LOGFILE}
-	if [ ! -f ${LOGFILE} ]; then
-		echo "No se puede crear el archivo de log, no se puede continuar" >&2
-		return 1;
-	fi
-	echo "Archivo de log creado exitosamente, redirigiendo salida" >&2
-fi
-
 #TODO: Si está, pasar stderr a log
 # (función log que loguee $1 a logfile?)
-echo 'Comando InicioX Inicio de Ejecución' >> ${LOGFILE}
+GlogX InicioX 'Inicio de Ejecución'
 
 #### Verificación de instalación
 ## Verificación de comandos
@@ -93,37 +113,41 @@ for c in ${comandos[@]}; do
 		comandosOK+=($c)
 	fi
 done
+####TODO: Carpetas escribibles
 ## Reporte de situación
 echo "Comandos registrados:" >&2
 echo ${comandos[@]} >&2
 if [ "${comandosNoEjecutables}x" != 'x' ]; then
-	echo "Comandos no ejecutables:" >&2
-	echo ${comandosNoEjecutables[@]} >&2
+	GlogX InicioX "Comandos no ejecutables: ${comandosNoEjecutables[@]}"
+	echo "Comandos no ejecutables: ${comandosNoEjecutables[@]}" >&2
 fi
 # Comandos faltantes
 if [ "${comandosFaltantes}x" != 'x' ]; then
-	echo "Faltan los siguientes comandos, no se puede continuar:" >&2
-	echo ${comandosFaltantes[@]} >&2
+	GlogX InicioX "Faltan los siguientes comandos, no se puede continuar: ${comandosFaltantes[@]}"
+	echo "Faltan los siguientes comandos, no se puede continuar: ${comandosFaltantes[@]}" >&2
 	return 1
 	# Arreglo de permisos
 elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 	echo "Desea hacerlos ejecutables? (s/N)" >&2
 	read ans
 	if [ "${ans}x" == sx -o "${ans}x" == Sx ]; then
+		GlogX InicioX "Cambiando permisos..."
 		echo Cambiando permisos... >&2
 		bad=()
 		for c in ${comandosNoEjecutables[@]}; do
 			f="${BINDIR}/$c"
 			if chmod gu+x $f 2>/dev/null; then
+				GlogX InicioX "OK: $c"
 				echo OK: $c >&2
 			else
+				GlogX InicioX "KO: $c"
 				echo KO: $c >&2
 				bad+=($c)
 			fi
 		done
 		if [ "${bad}x" != "x" ]; then
-			echo "No se pueden hacer ejecutables los siguientes comandos:" >&2
-			echo ${bad[@]} >&2
+			GlogX "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}"
+			echo "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}" >&2
 			return 3
 		fi
 	else
@@ -138,15 +162,12 @@ fi
 # Existan legibles
 
 ####TODO: Fallar si el entorno está inicializado
-# lockfile? ${grupo}/lock
-#  Si no existe, crearlo, borrarlo al final.
-#  Si existe, fallar. Sugerir borrar a mano.
 
 #### Exporto variables de entorno
 #### TODO: Traer CANLOOP, TESPERA más lindo
-echo "CANLOOP? (CHAR)"
+echo "CANLOOP?"
 read CANLOOP
-echo "TESPERA? (INT)"
+echo "TESPERA?"
 read TESPERA
 
 PATH+=":${BINDIR}"
@@ -154,6 +175,7 @@ confvars+=('CANLOOP' 'TESPERA' 'PATH' 'CONFDIR' 'grupo')
 for var in ${confvars[@]}; do
 	== "export ${var}"
 	== "echo ${var}=\${${var}}"
+	== "GlogX InicioX \"${var}=\${${var}}\""
 done
 =!
 
@@ -161,6 +183,9 @@ done
 echo "Desea efectuar la activación de DetectaX? (S/n)"
 read ans
 if [ "${ans}x" == sx -o "${ans}x" == Sx ]; then
+	GlogX InicioX "Iniciando DetectaX"
 	StartX DetectaX
+else
+	GlogX InicioX "DetectaX no iniciado"
 fi
 
