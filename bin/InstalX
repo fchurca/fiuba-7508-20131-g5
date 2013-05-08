@@ -99,9 +99,7 @@ verifyPerlIsInstalled() {
 	then
 		installed=0
 	else
-		version=$(perl -v | grep 'v.* ')
-		version=${version#*v}
-		version=${version%% *}
+		version=$(perl -v | grep 'v[0-9]\+' | sed -r 's/.*v([0-9.]+).*/\1/')
 		versionForComp=${version%%.*}
 		if [ $versionForComp -lt 5 ]
 		then
