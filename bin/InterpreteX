@@ -46,7 +46,6 @@ function interpretarCampo
 			fi
 		else
 			registroValido="FALSE"			
-			#TODO:logueo error
 		fi
 	elif echo "$formatoCampo"|grep -q "^ddmmyy"; then
 		local long1=`echo $formatoCampo|sed "s/\(ddmmyy\)\(.*\)\./\2/"`
@@ -57,7 +56,6 @@ function interpretarCampo
 			fecha1=`echo $2|sed "s~\(..\).\(..\).\(....\)~\1/\2/\3~"`
 		else
 			registroValido="FALSE"
-			#TODO:logueo error
 		fi
 		contenido=$fecha1
 	elif echo "$formatoCampo"|grep -q "^yymmdd"; then	
@@ -69,7 +67,6 @@ function interpretarCampo
 			fecha2=`echo $2|sed "s-\(....\).\(..\).\(..\)-\3/\2/\1-"`
 		else
 			registroValido="FALSE"
-			#TODO:logueo error
 		fi
 		contenido=$fecha2
 	elif echo "$formatoCampo"|grep -q '$'; then
@@ -79,11 +76,9 @@ function interpretarCampo
 			contenido=$texto
 		else
 			registroValido="FALSE"
-			#TODO:logueo error
 		fi
 	else 
 		registroValido="FALSE"
-		#TODO:logueo error	
 	fi
 }
 
@@ -169,7 +164,7 @@ function inicializarArray
 
 
 #Iniciando el log
-echo iniciando log
+GlogX InterpreteX "iniciando log, cantidad de Archivos=`ls -1 |wc -l`"
 
 if [ "$(ls -A $ACEPDIR)" ]; then
 #Proceso cada uno de los archivos del directorio
@@ -191,7 +186,7 @@ for arch in $ACEPDIR/*
 		if [ $existente == "True" ];then
 #Muevo archivo rechazado
 			MoverX "$aceptado" "$ACEPDIR" "$RECHDIR"
-			#TODO:logueo archivo rechazado
+			GlogX InterpretaX "DUPLICADO:$aceptado"
 		else 
 #Procesamiento de un archivo aceptado
 			name=`echo "$arch"|sed 's-^.*/--'`
@@ -226,21 +221,16 @@ for arch in $ACEPDIR/*
 				if [ $(echo "$mt_Rest > 0" | bc -l) -eq "1" -a "$registroValido" == "TRUE" ];then
 					escribirLinea
 					registrosOutput=$((registrosOutput+1))
-				else
-					echo "no hay deudas"
-					#TODO:logueo que no quedan deudas
 				fi
 			done < $arch
-			#TODO:logueo $registrosInput y $registrosOutput
+			GlogX InterpreteX "registros input=$registrosInput registrosOutput=$registrosOutput"
 			MoverX "$aceptado" "$ACEPDIR" "$PROCDIR"		
 		fi
 
 
 	done
 else
-	echo "directorio $acepdir vacio"
-	#TODO:logueo que no hay mas nada que procesar
+	GlogX InterpreteX "directorio $acepdir vacio"
 fi
 
-#echo fin de archivo
-#echo cerrar log
+GlogX InterpreteX "Fin de Interprete"
