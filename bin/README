@@ -1,0 +1,36 @@
+Instrucciones de preparación para la instalación
+
+1- Insertar el pendrive con el contenido del tp.
+2- Crear en el directori ocorriente un directorio de trabajo
+3- Copiar el archivo tp.tgz en ese directorio.
+4- Descomprimir el tp.tgz de manera de generar un tp.tar
+5- Extraer los archivos del tar.
+
+
+Instrucciones para la instalación
+
+1- Abrir una terminal en el directorio de trabajo.
+2- Escribir: ./InstalX
+3- Seguir las indicaciones del instalador.
+
+
+Resultado de la instalación
+
+La instalación crea todos los directorios y archivos necesarios para la correcta ejecución del sistema CONTROLX en la dirección especificada en la instalación.
+
+
+Primeros pasos de ejecución
+
+1- Abrir una terminal en el directorio donde se guardaron los ejecutables.
+2- Escribir: source InicioX
+3- Seguir las indicaciones de cada proceso.
+
+
+Ejecución manual de procesos
+
+Los procesos DetectaX, InterpreteX y ReporteX pueden ser llamados manualmente desde la consola, siempre y cuando no se estén ejecutando, escribiendo: StartX <comando>
+
+
+Detención de la ejecución de comandos
+
+Para detener la ejecución de los procesos escribir en la consola: StopX <comando>
