@@ -1,7 +1,7 @@
 #! /bin/bash
 
 ####TODO: FANCY!
-LOGFILE="${LOGDIR}/$1.${LOGEXT}"
+LOGFILE="${LOGDIR}/$1${LOGEXT}"
 if [ ! -r ${LOGFILE} ]; then
 	echo "No se puede leer el archivo de log, no se puede continuar:" >&2
 	echo ${LOGFILE} >&2

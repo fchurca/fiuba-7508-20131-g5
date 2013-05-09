@@ -20,11 +20,11 @@ if(!$maedir || !$procdir || !$repodir) {
 }
 
 %paths = ();
-$paths{"PS"} = $maedir."p-s.mae";
-$paths{"PPI"} = $maedir."PPI.mae";
-$paths{"PRESTAMOS"} = $procdir."PRESTAMOS."; # Cuando se sepa el pais se le debe agregar la extension
-$paths{"REPORTE"} = $repodir."ReporteX."; # La extension se genera al momento de guardado
-$paths{"RECALCULO"} = $repodir."RECALCULO."; # # Cuando se sepa el pais se le debe agregar la extension
+$paths{"PS"} = $maedir."/p-s.mae";
+$paths{"PPI"} = $maedir."/PPI.mae";
+$paths{"PRESTAMOS"} = $procdir."/PRESTAMOS."; # Cuando se sepa el pais se le debe agregar la extension
+$paths{"REPORTE"} = $repodir."/ReporteX."; # La extension se genera al momento de guardado
+$paths{"RECALCULO"} = $repodir."/RECALCULO."; # # Cuando se sepa el pais se le debe agregar la extension
 
 
 # Funcion que imprime el menu principal para la seleccion de tipo de consulta
