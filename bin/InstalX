@@ -37,6 +37,19 @@ listFiles() {
 	fi
 }
 
+function == {
+if [ ${CONTROLX_TMPFILE}x == x ]; then
+	CONTROLX_TMPFILE=`mktemp`
+fi
+echo $1 >> ${CONTROLX_TMPFILE}
+}
+
+function =! {
+source ${CONTROLX_TMPFILE}
+rm ${CONTROLX_TMPFILE}
+CONTROLX_TMPFILE=
+}
+
 #Mostar los datos de la instalación previa
 printPreviousInstalationData() {
 	echo 'TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05'
@@ -139,6 +152,73 @@ Cancele la instalación e intentelo más tarde o vuelva a intentarlo con otro va
 	done
 }
 
+#Proceso para completar la configuración de la instalación
+installationReconfiguration() {
+	if [ -z "$BINDIR" ]
+	then
+		echo "Defina el directorio de instalación de los ejecutables ($MAINDIR/bin):"
+		read BINDIR
+		BINDIR=$MAINDIR/$BINDIR
+	fi
+	if [ -z "$MAEDIR" ]
+	then
+		echo "Defina el directorio de instalación de los archivos maestros ($MAINDIR/mae):"
+		read MAEDIR
+		MAEDIR=$MAINDIR/$MAEDIR
+	fi
+	if [ -z "$ARRIDIR" ]
+	then
+		echo "Defina el directorio de arribo de archivos externos ($MAINDIR/arribos):"
+		read ARRIDIR
+		ARRIDIR=$MAINDIR/$ARRIDIR
+	fi
+	if [ -z "$DATASIZE" ]
+	then
+		DATASIZE=100
+		defineMinimumDiskSpace
+	fi
+	if [ -z "$RECHDIR" ]
+	then
+		echo "Defina el directorio de grabación de los archivos externos rechazados ($MAINDIR/rechazados):"
+		read RECHDIR
+		RECHDIR=$MAINDIR/$RECHDIR
+	fi
+	if [ -z "$ACEPDIR" ]
+	then
+		echo "Defina el directorio de grabación de los archivos externos aceptados ($MAINDIR/aceptados):"
+		read ACEPDIR
+		ACEPDIR=$MAINDIR/$ACEPDIR
+	fi
+	if [ -z "$PROCDIR" ]
+	then
+		echo "Defina el directorio de grabación de los archivos procesados ($MAINDIR/procesados):"
+		read PROCDIR
+		PROCDIR=$MAINDIR/$PROCDIR
+	fi
+	if [ -z "$REPODIR" ]
+	then
+		echo "Defina el directorio de grabación de los reportes de salida ($MAINDIR/reportes):"
+		read REPODIR
+		REPODIR=$MAINDIR/$REPODIR
+	fi
+	if [ -z "$LOGDIR" ]
+	then
+		echo "Defina el directorio de logs ($MAINDIR/log):"
+		read LOGDIR
+		LOGDIR=$MAINDIR/$LOGDIR
+	fi
+	if [ -z "$LOGEXT" ]
+	then
+		echo "Defina la extensión para los archivos de log (.log):"
+		read LOGEXT
+	fi
+	if [ -z "$LOGSIZE" ]
+	then
+		echo "Defina el tamaño máximo para los archivos $LOGEXT en Kbytes (400):"
+		read LOGSIZE
+	fi
+}
+
 #Proceso completo de configuración de la instalación
 installationConfiguration() {
 	echo "Defina el directorio de instalación de los ejecutables ($BINDIR):"
@@ -196,7 +276,7 @@ findReplaceAndWrite() {
 
 #Escribir los datos de la configuración del sistema
 writeSystemConfiguration() { ###CAMBIAR LOGIN DEL USUARIO
-	login=prueba01
+	login=$(whoami)
 	findReplaceAndWrite "GRUPO" "$MAINDIR" "$login"
 	findReplaceAndWrite "CONFDIR" "$CONFDIR" "$login"
 	findReplaceAndWrite "BINDIR" "$BINDIR" "$login"
@@ -236,6 +316,7 @@ installationProcess() {
 	source MoverX InterpreteX "$CURRENTDIR" "$BINDIR"
 	source MoverX StartX "$CURRENTDIR" "$BINDIR"
 	source MoverX StopX "$CURRENTDIR" "$BINDIR"
+	source MoverX ReporteX "$CURRENTDIR" "$BINDIR"
 	source MoverX MoverX "$CURRENTDIR" "$BINDIR"
 	echo 'Actualizando la configuración del sistema'
 	writeSystemConfiguration
@@ -256,12 +337,54 @@ echo "Directorio de configuración: $CONFDIR"
 #GRABAR EN InstalX.log
 
 #Detectar si ya fue instalado.
-if [ -f "$INSTALXCONF" ] #EN CUALQUIER PARTE DEL SISTEMA?
+if [ -f "$CONFDIR/$INSTALXCONF" ]
 then
-	echo 'El Fichero ya existe'
-	#LEVANTAR ARCHIVO DE CONFIGURACION Y REVISARLO
-	#result=$(grep -i "GRUPO" "grupo05/conf/InstalX.conf"); echo $?
-	printPreviousInstalationData "COMPLETA"
+	BINDIR=
+	MAEDIR=
+	ARRIDIR=
+	ACEPDIR=
+	RECHDIR=
+	PROCDIR=
+	REPODIR=
+	LOGDIR=
+	LOGEXT=
+	DATASIZE=
+	LOGSIZE=
+	confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR')
+	confvars=(${confdirs[@]} 'LOGEXT' 'LOGSIZE' 'DATASIZE')
+	badvars=()
+	for var in ${confvars[@]}
+	do
+		== `grep "^${var}=" "$CONFDIR/$INSTALXCONF" | cut -d= -f1,2`
+		== "if [ \${${var}}x == x ]; then badvars+=('${var}'); fi"
+	done
+	=!
+	if [ ${badvars}x == x ]
+	then
+		printPreviousInstalationData COMPLETA
+		echo "Proceso de instalación cancelado."
+	else
+		printPreviousInstalationData INCOMPLETA
+		echo "¿Desea completar la instalación? Si - No"
+		getYesOrNoAnswer
+		if [ "$answer" = "si" ]
+		then
+			verifyPerlIsInstalled
+			perlIsInstalled=$?
+			if [ $perlIsInstalled -eq 0 ]
+			then
+				installationReconfiguration
+				clear
+				printInstalationData
+				echo 'Iniciando Instalación. ¿Está Ud. seguro? Si - No'
+				getYesOrNoAnswer
+				if [ "$answer" = "si" ]
+				then
+					installationProcess
+				fi
+			fi
+		fi
+	fi
 else
 	termsAndConditions
 	if [ "$answer" = "si" ]

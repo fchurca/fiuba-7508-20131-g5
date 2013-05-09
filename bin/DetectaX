@@ -53,13 +53,6 @@ processArridirFile() {
 	fi
 }
 
-#Procesar un archivo de ACEPDIR
-processAcepdirFile() {
-	echo "InterpreteX"
-	#source InterpreteX
-	#MOSTRAR PROCESS ID, ETC
-}
-
 
 #######################################################
 
@@ -83,11 +76,7 @@ do
 
 	if [ "$(ls -A "$ACEPDIR")" ]
 	then
-		files=$(ls "$ARRIDIR")
-		for file in $files
-		do
-			processAcepdirFile "$ACEPDIR/$file"
-		done
+		StartX InterpreteX
 	fi
 	sleep $TESPERA
 done

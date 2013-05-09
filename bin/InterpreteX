@@ -1,12 +1,12 @@
 #!/bin/bash
 
-BINDIR=`pwd`
-
 # Funcion que determina los separadores para un pais dado
 function determinarSeparadores
 {
 	#determinarSeparadores $pais $codigo 
 	local path='T1.tab'
+	#saco \r
+	sed -i "s/\\r//g" "${CONFDIR}/${path}"
 	sepCampo=`grep "^${pais}-${codigo}-[^-]*-[^-]*$" "${CONFDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)/\2/"`
 	sepDec=`grep "^${pais}-${codigo}-[^-]*-[^-]*$" "${CONFDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)/\3/"`
 }
@@ -16,6 +16,8 @@ function obtenerCampos
 {
 	local path='T2.tab'
 	local CamposInfo=()
+	#saco \r
+	sed -i "s/\\r//g" "${CONFDIR}/${path}"
 	#Obtengo cada uno de los campos correspondientes al pais y codigo y los ordeno por orden de aparicion
 	CamposInfo+=`grep "^${pais}-${codigo}-[^-]*-[^-]*-[^-]*$" "${CONFDIR}/${path}"|sed "s/\(.*\)-\([^-]*\)-\([^-]*\)-\([^-]*\)/\2-\3-\4/"`
 	camposInfoOrdenados=`for c in ${CamposInfo[@]}; do echo "$c"; done | sort -t\- -n -k 2,2` 
@@ -31,8 +33,11 @@ function interpretarCampo
 	if echo "$formatoCampo"|grep -q "^commax"; then
 		local maxLongInt=`echo $formatoCampo|sed "s/\(^commax\)\([^\.]*\)\.\(.*\)/\2/"`
 		local maxLongDec=`echo $formatoCampo|sed "s/\(^commax\)\([^\.]*\)\.\(.*\)/\3/"`
-		local decimal=`echo "$2"|cut -d"${sepDec}" -f2`
 		local entero=`echo "$2"|cut -d"${sepDec}" -f1`
+		local decimal=""
+		if echo "$2"|grep -q "\\${sepDec}";then
+		decimal=`echo "$2"|cut -d"${sepDec}" -f2`
+		fi
 		if [ ${#decimal} -le $maxLongDec -a ${#entero} -le $maxLongInt ];then
 			if [ "$decimal" == "" -o "$2" == "$entero" ];then
 				contenido="$entero"
@@ -40,7 +45,6 @@ function interpretarCampo
 				contenido="$entero,$decimal"
 			fi
 		else
-			echo "logueo Error"
 			registroValido="FALSE"			
 			#TODO:logueo error
 		fi
@@ -52,36 +56,32 @@ function interpretarCampo
 		elif [ $long1 -eq 10 ]; then
 			fecha1=`echo $2|sed "s~\(..\).\(..\).\(....\)~\1/\2/\3~"`
 		else
-			echo "logueo Error"
 			registroValido="FALSE"
 			#TODO:logueo error
 		fi
 		contenido=$fecha1
-	elif echo "$formatoCampo" | grep -q "^yyddmm"; then
-		local long2=`echo $formatoCampo|sed "s/\(yyddmm\)\(.*\)\./\2/"`
+	elif echo "$formatoCampo"|grep -q "^yymmdd"; then	
+		local long2=`echo $formatoCampo|sed "s/\(yymmdd\)\(.*\)\./\2/"`
 		local fecha2
 		if [ $long2 -eq 8 ]; then
-			fecha2=`echo $2|sed "s-\(....\)\(..\)\(..\)-\2/\3/\1-"`
+			fecha2=`echo $2|sed "s-\(....\)\(..\)\(..\)-\3/\2/\1-"`
 		elif [ $long2 -eq 10 ]; then
-			fecha2=`echo $2|sed "s-\(....\).\(..\).\(..\)-\2/\3/\1-"`
+			fecha2=`echo $2|sed "s-\(....\).\(..\).\(..\)-\3/\2/\1-"`
 		else
-			echo "logueo Error"
 			registroValido="FALSE"
 			#TODO:logueo error
 		fi
 		contenido=$fecha2
 	elif echo "$formatoCampo"|grep -q '$'; then
-		local maxLong=`echo $formatoCampo|sed "s/\(^.\)\(.*\)/\2/"`
+		local maxLong=`echo $formatoCampo|sed "s/\(^.\)\(.*\)\(.\)/\2/"`
 		if [ ${#2} -le $maxLong ];then 
 			local texto=$2
 			contenido=$texto
 		else
-			echo "logueo Error"
 			registroValido="FALSE"
 			#TODO:logueo error
 		fi
 	else 
-		echo "logueo este Error"
 		registroValido="FALSE"
 		#TODO:logueo error	
 	fi
@@ -116,11 +116,11 @@ function anidarCampo
 #Escribo la linea formateada en el archivo del pais
 function escribirLinea
 {
-	if [ -e "$procdir/PRESTAMOS.$pais" ];then
-		echo $lineaFormateada | cat >> "$procdir/PRESTAMOS.$pais"
+	if [ -e "$PROCDIR/PRESTAMOS.$pais" ];then
+		echo $lineaFormateada | cat >> "$PROCDIR/PRESTAMOS.$pais"
 	else
-		touch "$procdir/PRESTAMOS.$pais"
-		echo $lineaFormateada | cat >> "$procdir/PRESTAMOS.$pais"
+		touch "$PROCDIR/PRESTAMOS.$pais"
+		echo $lineaFormateada | cat >> "$PROCDIR/PRESTAMOS.$pais"
 	fi
 }
 
@@ -146,7 +146,7 @@ function generarLinea
 		lineaFormateada+="${arrayCampos[PRES_CLI_ID]};"
 		lineaFormateada+="${arrayCampos[PRES_CLI]};"
 		lineaFormateada+=`date +"%d/%m/%Y"`
-		lineaFormateada+=";$LOGNAME"
+		lineaFormateada+=";$USER"
 }
 
 #cargo valores por defecto por si falta algun campo en el archivo de entrada
@@ -157,6 +157,12 @@ function inicializarArray
 	arrayCampos[MT_INDE]="0"
 	arrayCampos[MT_INNODE]="0"
 	arrayCampos[MT_DEB]="0"
+	arrayCampos[PRES_CLI]=""
+	arrayCampos[PRES_CLI_ID]=""
+	arrayCampos[PRES_ID]=""
+	arrayCampos[CTB_ESTADO]=""
+	arrayCampos[CTB_FE]=""
+
 }
 
 #Main
@@ -184,18 +190,14 @@ for arch in $ACEPDIR/*
 			done
 		if [ $existente == "True" ];then
 #Muevo archivo rechazado
-			echo "Archivo $aceptado ya procesado.Mover a rechdir"
-			mv $arch $RECHDIR
-			echo "grabar log"
+			MoverX "$aceptado" "$ACEPDIR" "$RECHDIR"
+			#TODO:logueo archivo rechazado
 		else 
 #Procesamiento de un archivo aceptado
-			echo "Archivo nuevo procesado $i"
-			name=`echo "$arch"|cut -d "/" -f3`
+			name=`echo "$arch"|sed 's-^.*/--'`
 			pais=`echo "$name"|cut -d"-" -f1`
 			codigo=`echo "$name"|cut -d"-" -f2`
-			echo "pais:$pais codigo:$codigo"
 			determinarSeparadores 
-			echo "separador:$sepCampo Sepdec:$sepDec"
 			obtenerCampos
 			registrosInput="0"
 			registrosOutput="0"
@@ -203,6 +205,8 @@ for arch in $ACEPDIR/*
 			do
 			#leyendo registro
 			#deberia coincidir la cantidad de campos del archivo con los de camposOrdenados
+				#saco el fin de linea
+				linea=`echo "$linea"|sed "s/\\r//"`
 				indice=1
 				mt_Rest=0
 				registroValido="TRUE"
@@ -210,8 +214,8 @@ for arch in $ACEPDIR/*
 				declare -A arrayCampos
 				inicializarArray
 				for campoInfo in ${camposInfoOrdenados[@]}; do
-					campo=`echo "$linea"|cut -d$sepCampo -f$indice`
-					interpretarCampo $campoInfo $campo	
+					campo=`echo "$linea"|cut -d"$sepCampo" -f"$indice"`
+					interpretarCampo "$campoInfo" "$campo"	
 					if [ "$registroValido" == "FALSE" ];then
 						break
 					fi 				
@@ -219,19 +223,16 @@ for arch in $ACEPDIR/*
 					indice=$((indice+1))
 				done	
 				generarLinea
-				echo "lineaFormateada=$lineaFormateada"
 				if [ $(echo "$mt_Rest > 0" | bc -l) -eq "1" -a "$registroValido" == "TRUE" ];then
 					escribirLinea
-					echo "mt_rest=$mt_Rest"
 					registrosOutput=$((registrosOutput+1))
 				else
-					echo "no quedan deudas. mt_rest=$mt_Rest"
+					echo "no hay deudas"
 					#TODO:logueo que no quedan deudas
 				fi
 			done < $arch
-			echo "registrosInput=$registrosInput registrosOutput=$registrosOutput"
-			echo ""			
-			mv $arch $PROCDIR
+			#TODO:logueo $registrosInput y $registrosOutput
+			MoverX "$aceptado" "$ACEPDIR" "$PROCDIR"		
 		fi
 
 
