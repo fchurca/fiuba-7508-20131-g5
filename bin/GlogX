@@ -1,16 +1,15 @@
 #! /bin/bash
 
-function GlogX {
 if [ $# -lt 2 ]; then
 	echo "GlogX: GlogX comando msg [lvl]" >&2
-	return 1
+	exit 1
 fi
 if [ ${LOGFILE}x == x ]; then
 	LOGFILE="${LOGDIR}/$1.${LOGEXT}"
 	if [ -f ${LOGFILE} -a ! -w ${LOGFILE} ]; then
 		echo "No se puede escribir en el archivo de log, no se puede continuar:" >&2
 		echo ${LOGFILE} >&2
-		return 1;
+		exit 1;
 	fi
 	if [ ! -f ${LOGFILE} ]; then
 		echo "Falta el archivo de log, creando:" >&2
@@ -18,10 +17,9 @@ if [ ${LOGFILE}x == x ]; then
 		touch ${LOGFILE}
 		if [ ! -f ${LOGFILE} ]; then
 			echo "No se puede crear el archivo de log, no se puede continuar" >&2
-			return 1;
+			exit 1;
 		fi
 	fi
 fi
 echo "`date -u`-`whoami`-$1-$3-$2" >> ${LOGFILE}
-}
 

@@ -2,26 +2,20 @@
 
 ########TODO: Documentar!
 
-
-#TODO: VER CÓMO SE PUEDE HACER CON FIFOs
-function == {
-if [ ${CONTROLX_TMPFILE}x == x ]; then
-	CONTROLX_TMPFILE=`mktemp`
-fi
-echo $1 >> ${CONTROLX_TMPFILE}
-}
-function =! {
-source ${CONTROLX_TMPFILE}
-rm ${CONTROLX_TMPFILE}
-CONTROLX_TMPFILE=
-}
-
 #! Desde acá loguear a stderr
 if [ "$1"x == -dx ]; then
 	grupo=`pwd` # debug
 else
 	grupo="${HOME}/7508-20131-g5" # real
 fi
+
+LIB=${grupo}/LibX.sh
+if [ ! -r ${LIB} ]; then
+	echo "Biblioteca no encontrada, no se puede continuar: ${LIB}" >&2
+	return 1;
+fi
+source ${grupo}/LibX.sh
+
 CONFDIR=${grupo}/conf
 CONFFILE=${CONFDIR}/InstalX.conf
 if [ ! -f ${CONFFILE} ]; then
@@ -56,8 +50,9 @@ else
 	echo "${badvars[@]}" >&2
 	return 1
 fi
-
 PATH+=":${BINDIR}"
+export LOGDIR
+export LOGEXT
 
 #TODO: Si está, pasar stderr a log
 # (función log que loguee $1 a logfile?)
@@ -138,7 +133,6 @@ echo "TESPERA?"
 read TESPERA
 
 confvars+=('CANLOOP' 'TESPERA' 'PATH' 'CONFDIR' 'grupo')
-echo ${confvars[@]}
 for var in ${confvars[@]}; do
 	== "export ${var}"
 	== "echo ${var}=\${${var}}"
