@@ -1,0 +1,13 @@
+#! /bin/bash
+
+####TODO: FANCY!
+function VlogX {
+LOGFILE="${LOGDIR}/$1.${LOGEXT}"
+if [ ! -r ${LOGFILE} ]; then
+	echo "No se puede leer el archivo de log, no se puede continuar:" >&2
+	echo ${LOGFILE} >&2
+	return 1;
+fi
+cat ${LOGFILE}
+}
+
