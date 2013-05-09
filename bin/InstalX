@@ -317,6 +317,9 @@ installationProcess() {
 	source MoverX StartX "$CURRENTDIR" "$BINDIR"
 	source MoverX StopX "$CURRENTDIR" "$BINDIR"
 	source MoverX ReporteX "$CURRENTDIR" "$BINDIR"
+	source MoverX VlogX "$CURRENTDIR" "$BINDIR"
+	source MoverX GlogX "$CURRENTDIR" "$BINDIR"
+	source MoverX LibX.sh "$CURRENTDIR" "$MAINDIR"
 	source MoverX MoverX "$CURRENTDIR" "$BINDIR"
 	echo 'Actualizando la configuración del sistema'
 	writeSystemConfiguration

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 ########## Comando ReporteX.pl  ##########
 ########## Consultas y Reportes ##########
@@ -6,19 +6,13 @@
 
 # Verificacion de inicializacion de ambiente
 # TODO: para pruebas locales en WIN: ELIMINAR
-$maedir = "C:/Users/pivancic/Desktop/so/archivos/";
-$procdir = "C:/Users/pivancic/Desktop/so/archivos/";
-$repodir = "C:/Users/pivancic/Desktop/so/archivos/";
+#$maedir = "C:/Users/pivancic/Desktop/so/archivos/";
+#$procdir = "C:/Users/pivancic/Desktop/so/archivos/";
+#$repodir = "C:/Users/pivancic/Desktop/so/archivos/";
 
-# TODO: para pruebas locales UNIX: ELIMINAR
-#$maedir = $ENV{"HOME"}."/Desktop/archivos/";
-#$procdir = $ENV{"HOME"}."/Desktop/archivos/";
-#$repodir = $ENV{"HOME"}."/Desktop/archivos/";
-
-# TODO: DESCOMENTAR
-# $maedir = $ENV{"MAEDIR"};
-# $procdir = $ENV{"PROCDIR"};
-# $repodir = $ENV{"REPODIR"};
+$maedir = $ENV{"MAEDIR"};
+$procdir = $ENV{"PROCDIR"};
+$repodir = $ENV{"REPODIR"};
 
 if(!$maedir || !$procdir || !$repodir) {
    print "Las variables de ambiente no estan inicializadas. Se cortara la ejecucion del comando. \n";
@@ -61,10 +55,9 @@ sub ayuda {
    print "[-g]: Grabar reporte de salida con lo mismo que se muestra por pantalla. Opcional.\n";
    print "PAIS: Nombre de Pais. Obligatorio.\n";
    print "[SISTEMA]: Sistema. Opcional.\n";
-   print "[ANIO|PERIODO|RANGO]: Anio (yyyy).\n";
-   print "                      Periodo anio-mes (yyyy-mm).\n";
-   print "                      Rango de periodos anioDesde-mesDesde-anioHasta-mesHasta (yyyy-mm-yyyy-mm).\n";
-   print "                      Opcional.\n";
+   print "[ANIO|PERIODO]: Anio (yyyy).\n";
+   print "                Periodo anio-mes (yyyy-mm).\n";
+   print "                Opcional.\n";
    print "[VALOR_COMPARACION]: Porcentaje de comparacion para consulta 2.\n";
    print "                     Monto de comparacion para consulta 3.\n";
    print "                     Obligatorio en ambos casos.\n";
@@ -189,7 +182,6 @@ while($consultar eq 'S') {
 			}
 		   
 		   # Se toma el parametro de filtro por fecha, si es que se ingreso.
-		   # TODO: realizar validaciones de año y mes.
 		   $parametro = $parametros[$indice];
 		   if($parametro =~ m#^\d\d\d\d$#) {
 			$filtros{"ANIO"} = $parametro; $indice++;
@@ -210,15 +202,19 @@ while($consultar eq 'S') {
 		   }
 		   
 		   # Parametro de Diferencia para consultas 2 y 3
-		   if($filtros{"TIPO_CONSULTA"} != 1 && $parametros[$indice] =~ m#^\d+$#) {
-		    if($filtros{"TIPO_CONSULTA"} == 2 && ($parametros[$indice] <= 0 || $parametros[$indice] > 100)) {
-				print "El % de diferencia debe estar entre el rango de 0-100%. Se omitira este filtro.\n"; 
-				$parametrosOK = "N";
-			} elsif ($filtros{"TIPO_CONSULTA"} == 3 && ($parametros[$indice] <= 0)) {
-				print "La diferencia debe ser mayor a 0. Se omitira este filtro.\n";
-				$parametrosOK = "N";
+		   if($filtros{"TIPO_CONSULTA"} != 1) { 
+			if($parametros[$indice] =~ m#^\d+$#) {
+				if($filtros{"TIPO_CONSULTA"} == 2 && ($parametros[$indice] < 0 || $parametros[$indice] > 100)) {
+					print "El % de diferencia debe estar entre el rango de 0-100%. Se omitira este filtro.\n"; 
+					$parametrosOK = "N";
+				} elsif ($filtros{"TIPO_CONSULTA"} == 3 && ($parametros[$indice] <= 0)) {
+					print "La diferencia debe ser mayor a 0. Se omitira este filtro.\n";
+					$parametrosOK = "N";
+				} else {
+					$filtros{"VALOR_COMPARACION"} = $parametros[$indice];
+				}
 			} else {
-				$filtros{"VALOR_COMPARACION"} = $parametros[$indice];
+				$parametrosOK = "N";
 			}
 		   }
 		   
@@ -445,7 +441,7 @@ while($consultar eq 'S') {
 		}
 	}
 	
-	
+	# Imprime en pantalla la consulta
 	if($filtros{"TIPO_CONSULTA"} == 1) {
 		printf("%-14s%-13s%-24s%-21s%-23s%-20s%-14s\n","Cod. Prestamo","Cod. Cliente","Estado contable Maestro","Estado contable Pais","Monto restante Maestro","Monto restante Pais","Recomendacion");
 		foreach $entradaRepo(@reporte) {
@@ -460,8 +456,8 @@ while($consultar eq 'S') {
 		}
 	}
 
+	# Guarda reporte si corresponde
 	if($filtros{"GUARDAR_CONSULTA"} eq "S") {
-	   # Guardando reporte
 		print "Se guardara el reporte \n";
 	   	open(REPORTE,">".$paths{"REPORTE"}.$it);
 		   
