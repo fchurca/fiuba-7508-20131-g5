@@ -24,7 +24,6 @@ if [ ! -f ${CONFFILE} ]; then
 	return 1;
 fi
 
-BINDIR=
 confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR')
 confvars=(${confdirs[@]} 'LOGEXT' 'LOGSIZE' 'DATASIZE')
 badvars=()
@@ -55,12 +54,11 @@ export LOGDIR
 export LOGEXT
 
 #TODO: Si está, pasar stderr a log
-# (función log que loguee $1 a logfile?)
 GlogX InicioX 'Inicio de Ejecución'
 
 #### Verificación de instalación
 ## Verificación de comandos
-comandos=('InicioX' 'DetectaX' 'StartX' 'StopX' 'InterpreteX' 'MoverX' 'GlogX' 'VlogX') # 'ReporteX'
+comandos=('InicioX' 'DetectaX' 'StartX' 'StopX' 'InterpreteX' 'MoverX' 'GlogX' 'VlogX' 'ReporteX')
 comandosFaltantes=()
 comandosNoEjecutables=()
 comandosOk=()
