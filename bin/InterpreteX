@@ -137,7 +137,8 @@ function generarLinea
 		lineaFormateada+="${arrayCampos[MT_INDE]};"
 		lineaFormateada+="${arrayCampos[MT_INNODE]};"
 		lineaFormateada+="${arrayCampos[MT_DEB]};"
-		lineaFormateada+="$mt_Rest;"
+		local mt_RestAux=`echo $mt_Rest|sed "s/\./,/"`
+		lineaFormateada+="$mt_RestAux;"
 		lineaFormateada+="${arrayCampos[PRES_CLI_ID]};"
 		lineaFormateada+="${arrayCampos[PRES_CLI]};"
 		lineaFormateada+=`date +"%d/%m/%Y"`
