@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+﻿#!/usr/bin/perl -w
 
 ########## Comando ReporteX.pl  ##########
 ########## Consultas y Reportes ##########
@@ -6,13 +6,19 @@
 
 # Verificacion de inicializacion de ambiente
 # TODO: para pruebas locales en WIN: ELIMINAR
-#$maedir = "C:/Users/pivancic/Desktop/so/archivos/";
-#$procdir = "C:/Users/pivancic/Desktop/so/archivos/";
-#$repodir = "C:/Users/pivancic/Desktop/so/archivos/";
+$maedir = "C:/Users/pivancic/Desktop/so/datos/";
+$procdir = "C:/Users/pivancic/Desktop/so/datos/";
+$repodir = "C:/Users/pivancic/Desktop/so/datos/";
 
-$maedir = $ENV{"MAEDIR"};
-$procdir = $ENV{"PROCDIR"};
-$repodir = $ENV{"REPODIR"};
+#TODO: para pruebas locales en MINT. ELIMINAR
+#$maedir = $ENV{"HOME"}."/7508/archivos-test";
+#$procdir = $ENV{"HOME"}."/7508/archivos-test";
+#$repodir = $ENV{"HOME"}."/7508/archivos-test";
+
+# TODO: DESCOMENTAR
+#$maedir = $ENV{"MAEDIR"};
+#$procdir = $ENV{"PROCDIR"};
+#$repodir = $ENV{"REPODIR"};
 
 if(!$maedir || !$procdir || !$repodir) {
    print "Las variables de ambiente no estan inicializadas. Se cortara la ejecucion del comando. \n";
@@ -25,6 +31,9 @@ $paths{"PPI"} = $maedir."/PPI.mae";
 $paths{"PRESTAMOS"} = $procdir."/PRESTAMOS."; # Cuando se sepa el pais se le debe agregar la extension
 $paths{"REPORTE"} = $repodir."/ReporteX."; # La extension se genera al momento de guardado
 $paths{"RECALCULO"} = $repodir."/RECALCULO."; # # Cuando se sepa el pais se le debe agregar la extension
+
+
+# TODO: Verificar que el comando no se este corriendo.
 
 
 # Funcion que imprime el menu principal para la seleccion de tipo de consulta
@@ -49,19 +58,19 @@ sub ayuda {
    print "Menu de ayuda\n";
    print "-------------\n";
    print "Los posibles parametros del comando son:\n";
-   print "[-a] TIPO_CONSULTA [-g] PAIS [SISTEMA] [ANIO|PERIODO|RANGO] [VALOR_COMPARACION]\n";
-   print "[-a]: Menu de ayuda.\n";
-   print "TIPO_CONSULTA: Tipo de consulta a realizar. Obligatorio.\n";
-   print "[-g]: Grabar reporte de salida con lo mismo que se muestra por pantalla. Opcional.\n";
+   print "-a|TIPO_CONSULTA PAIS [SISTEMA] [ANIO|PERIODO|RANGO] [VALOR_COMPARACION] [-g]\n";
+   print "TIPO_CONSULTA: Tipo de consulta a realizar o -a si desea ver el menu de ayuda. Obligatorio.\n";
    print "PAIS: Nombre de Pais. Obligatorio.\n";
    print "[SISTEMA]: Sistema. Opcional.\n";
    print "[ANIO|PERIODO]: Anio (yyyy).\n";
    print "                Periodo anio-mes (yyyy-mm).\n";
+   print "                Rango anio-mes-anioHasta-mesHasta (yyyy-mm-yyyy-mm).\n";
    print "                Opcional.\n";
    print "[VALOR_COMPARACION]: Porcentaje de comparacion para consulta 2.\n";
    print "                     Monto de comparacion para consulta 3.\n";
    print "                     Obligatorio en ambos casos.\n";
-   print "Ingrese el tipos de consulta que desea realizar con sus parametros:\n";
+   print "[-g]: Grabar reporte de salida con lo mismo que se muestra por pantalla. Opcional.\n";
+   print "Ingrese el tipo de consulta que desea realizar con sus parametros:\n";
 }
 
 
@@ -95,7 +104,7 @@ $it = 1;
 while($consultar eq 'S') {
 
 	menu();	
-	########## INGRESO DE PARAMETROS DE CONSULTA ##########
+	########## Ingreso de parametros ##########
 	$consulta = <STDIN>; 
 	chomp($consulta);
 
@@ -133,6 +142,7 @@ while($consultar eq 'S') {
 		   chomp($consulta);
 		   @parametros = split(/\s+/, $consulta);
 		   $cantidadParametros = @parametros;
+		
 		} else {
 		   $parametrosOK = "S";
 		   $indice = 0;
@@ -141,14 +151,8 @@ while($consultar eq 'S') {
 		   if($parametros[$indice] =~ m#^[123]$# ) {
 			$filtros{"TIPO_CONSULTA"} = $parametros[$indice]; $indice++;
 		   } else {
-			print "Tipo de consulta INEXISTENTE. No se realizara la consulta. \n";
+			print "[ERROR] Tipo de consulta INEXISTENTE. No se realizara la consulta. \n";
 			$parametrosOK = "N";
-		   }
-		   
-		   if($parametros[$indice] eq "-g") {
-			# Se guardara el reporte
-			print "Se guardara el reporte \n";	  	
-			$filtros{"GUARDAR_CONSULTA"} = "S"; $indice++;
 		   }
 		   
 		   # Se toma el parametro PAIS ingresado.
@@ -156,73 +160,95 @@ while($consultar eq 'S') {
 		   if($parametro =~ m#[\w+]# && exists($paises{uc($parametro)})) {
 			$filtros{"PAIS_NOMBRE"} = $parametro;
 			$filtros{"PAIS_ID"} = $paises{uc($parametro)};
-			
 			$indice++;
 		   } else {
-			# Pais INVALIDO
-			print "El pais ingresado es INVALIDO. La consulta no podra ser realizada. \n";
+			# Pais Invalido
+			print "[ERROR] El pais ingresado es INVALIDO. La consulta no podra ser realizada. \n";
 			$parametrosOK = "N";
 		   }
 
 		   # Se toma el parametro de filtro por sistema, si es que se ingreso.
 		   $parametro = $parametros[$indice];
 		   if($parametro =~ m#^\d+$# && $parametro <1000) {
-			   # Se supone que el ID del sistema no puede ser mayor que 999
-			   if(exists($sistemas{$parametro})) {
-				$filtros{"SISTEMA_ID"} = $parametro;
-				$filtros{"SISTEMA_NOMBRE"} = $sistemas{$parametro};
-				$indice++;
-			   } else {
-				# Sistema INEXISTENTE
-				print "El sistema no existe. Se omitira este filtro \n";
-				$sistemaId = "";
-			   }
+			# Se supone que el ID del sistema no puede ser mayor que 999
+			if(exists($sistemas{$parametro})) {
+			   $filtros{"SISTEMA_ID"} = $parametro;
+			   $filtros{"SISTEMA_NOMBRE"} = $sistemas{$parametro};
+			   $indice++;
 			} else {
-				print "Formato de sistema invalido. Se omitira este filtro. \n";
+			   # Sistema Inexistente
+			   print "[WARNING] El sistema no existe. Se omitira este filtro \n";
 			}
+		   }
 		   
 		   # Se toma el parametro de filtro por fecha, si es que se ingreso.
 		   $parametro = $parametros[$indice];
 		   if($parametro =~ m#^\d\d\d\d$#) {
-			$filtros{"ANIO"} = $parametro; $indice++;
+			# ANIO
+			if ($parametro < 1990 || $parametro > 2013) {
+			   print "[WARNING] Anio invalido. Se omitira el filtro de fecha. \n";
+			} else { 			
+			   $filtros{"ANIO"} = $parametro; $indice++;
+		   	}
 		   } elsif ($parametro =~ m#^\d\d\d\d-\d\d$#) {
+			# PERIODO			
 			@fecha = split("-",$parametro);
-			$filtros{"ANIO"} = $fecha[0];
-			$filtros{"MES"} = $fecha[1];
+				
+			if($fecha[0] < 1990 || $fecha[0] > 2013 || $fecha[1] < 1 || $fecha[1] > 12) {
+			   print "[WARNING] Anio y/o mes invalido/s. Se omitira el filtro de fecha. \n";
+			} else {
+			   $filtros{"ANIO"} = $fecha[0];
+   			   $filtros{"MES"} = $fecha[1];
+			}
 			$indice++;
 		   } elsif ($parametro =~ m#^\d\d\d\d-\d\d-\d\d\d\d-\d\d$#) {
+			# RANGO			
 			@fecha = split("-",$parametro);
-			$filtros{"ANIO"} = $fecha[0];
-			$filtros{"MES"} = $fecha[1];
-			$filtros{"ANIO_HASTA"} = $fecha[2];
-			$filtros{"MES_HASTA"} = $fecha[3];
+			
+			if($fecha[0] < 1990 || $fecha[0] > 2013 || $fecha[1] < 1 || $fecha[1] > 12 || $fecha[2] < 1990 || $fecha[2] > 2013 || $fecha[3] < 1 || $fecha[3] > 12) {
+			   print "[WARNING] Rango invalido. Se omitira el filtro de fecha. \n";
+			} elsif($fecha[0] > $fecha[2]) {
+			   print "[WARNING] Rango invalido. Se omitira el filtro de fecha. \n";	
+			} elsif($fecha[0] == $fecha[2] && $fecha[1] >= $fecha[3]) {
+			   print "[WARNING] Rango invalido. Se omitira el filtro de fecha. \n";
+			} else {
+			   $filtros{"ANIO"} = $fecha[0];
+			   $filtros{"MES"} = $fecha[1];
+			   $filtros{"ANIO_HASTA"} = $fecha[2];
+			   $filtros{"MES_HASTA"} = $fecha[3];
+			}
 			$indice++;
-		   } else {
-			print "Formato de fecha invalido. Se omitira el filtro de fecha.\n";
 		   }
 		   
 		   # Parametro de Diferencia para consultas 2 y 3
 		   if($filtros{"TIPO_CONSULTA"} != 1) { 
 			if($parametros[$indice] =~ m#^\d+$#) {
-				if($filtros{"TIPO_CONSULTA"} == 2 && ($parametros[$indice] < 0 || $parametros[$indice] > 100)) {
-					print "El % de diferencia debe estar entre el rango de 0-100%. Se omitira este filtro.\n"; 
+				if($filtros{"TIPO_CONSULTA"} == 2 && ($parametros[$indice] <= 0 || $parametros[$indice] > 100)) {
+					print "[ERROR] El % de diferencia debe estar entre el rango de 0-100.\n"; 
 					$parametrosOK = "N";
 				} elsif ($filtros{"TIPO_CONSULTA"} == 3 && ($parametros[$indice] <= 0)) {
-					print "La diferencia debe ser mayor a 0. Se omitira este filtro.\n";
+					print "[ERROR] La diferencia debe ser mayor a 0. Se omitira este filtro.\n";
 					$parametrosOK = "N";
 				} else {
 					$filtros{"VALOR_COMPARACION"} = $parametros[$indice];
+					$indice++;
 				}
 			} else {
 				$parametrosOK = "N";
 			}
 		   }
+
+		   # Se verifica si se desea guardar el reporte
+		   if($parametros[$indice] eq "-g") {
+			print "Se guardara el reporte \n";	  	
+			$filtros{"GUARDAR_CONSULTA"} = "S"; $indice++;
+		   }
 		   
 		   if($parametrosOK eq "N") {
-			print "La consulta no se puede realizar por error/es en el/los parametro/s.\n";
+			print "La consulta no se puede realizar por error/es en los parametros.\n";
 		
 			# Se solicitan nuevamente los parametros
-			print "Ingrese los parametros de consulta nuevamente: ";
+			print "Ingrese nuevamente el tipo de consulta que desea realizar con sus parametros: ";
 			$consulta = <STDIN>;
 			chomp($consulta);
 			@parametros = split(/\s+/, $consulta);
@@ -231,44 +257,14 @@ while($consultar eq 'S') {
 		}
 	}
 	
-	########## SE LISTAN LOS PARAMETROS DE CONSULTA ##########
-	print "\nLos parametros de consulta son los siguientes: \n";
-	print "TIPO CONSULTA = $filtros{'TIPO_CONSULTA'} \n";
-	print "PAIS = $filtros{'PAIS_NOMBRE'} \n";
-	
-	if($filtros{'SISTEMA_ID'} && $filtros{'SISTEMA_ID'} ne "") {
-		print "SISTEMA = $filtros{'SISTEMA_ID'} \n";
-	}
 
-	if($filtros{"ANIO"} && $filtros{"ANIO"} ne "") {
-		print "ANIO = $filtros{'ANIO'} \n";
-	}
-	if($filtros{"MES"} && $filtros{"MES"} ne "") {
-		print "MES = $filtros{'MES'} \n";
-	}
-	if($filtros{"ANIO_HASTA"} && $filtros{"ANIO_HASTA"} ne "") {
-		print "ANIO HASTA = $filtros{'ANIO_HASTA'} \n";
-	}
-	if($filtros{"MES_HASTA"} && $filtros{"MES_HASTA"} ne "") {
-		print "MES HASTA = $filtros{'MES_HASTA'} \n";
-	}
-	
-	if($filtros{'VALOR_COMPARACION'} && $filtros{'VALOR_COMPARACION'} ne "") {
-		print "VALOR DE COMPARACION = $filtros{'VALOR_COMPARACION'} \n";	
-	}
-
-	
-	########## EJECUCION DE CONSULTA ##########
-	
-	print "\nSe realizara la consulta... \n\n";
-
+	########## Ejecucion de consulta ##########
 	@ppiArray = ();
 	@prestamosArray = ();
 	@montosRestantesPPIArray = ();
 	@montosRestantesPrestamosArray = ();
 	
-	# 1ER PASO
-	# Seteo de filtros en la consulta
+	########## 1ER PASO ##########
 	$pais = $filtros{"PAIS_ID"};
 	
 	$sistema = '\d+';
@@ -276,43 +272,75 @@ while($consultar eq 'S') {
 		$sistema = $filtros{'SISTEMA_ID'}; 
 	}
 	
-	$anio = '\d+';
-	if($filtros{"ANIO"} && $filtros{"ANIO"} ne "") {
-		$anio = $filtros{"ANIO"}; 
-		# TODO: regex para rango de a�os
-	}
-	
-	$mes = '\d+';
-	if($filtros{"MES"} && $filtros{"MES"} ne "") {
-		$mes = $filtros{"MES"};
-		# TODO: regex para rango de meses
-	}
-	
-	# Se lee el Archivo MAESTRO y se obtienen los registros filtrados
+	# Se lee el Archivo Maestro y se obtienen los registros del mismo filtrados
 	open(PPIFILE, $paths{"PPI"});
 	
 	$i = 0;
 	while ($linea = <PPIFILE>) {
-		if($linea =~ m#($pais);($sistema);($anio);($mes);(\d+);(\w+);(\d\d/\d\d/\d\d\d\d);(\w+);(\w+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+)#) {
+		if($linea =~ m#($pais);($sistema);(\d+);(\d+);(\d+);(\w+);(\d\d/\d\d/\d\d\d\d);(\w+);(\w+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+)#) {
 		   # $1 PAIS_ID ; $2 SIS_ID ; $3 CTB_ANIO ; $4 CTB_MES ; $5 CTB_DIA ; $6 CTB_ESTADO ; $7 PRES_FE ; $8 PRES_ID ; $9 PRES_TI 
 		   # $10 MT_PRES ; $11 MT_IMPAGO ; $12 MT_INDE ; $13 MT_INNODE ; $14 MT_DEB
-		    
-		   # 2DO PASO 
-		   # Se calcula el monto restante del MAESTRO
-		   $pres = $10; $impago = $11; $inde = $12; $innode = $13; $deb = $14; 
-		   $pres =~ s/,/./ig; $impago =~ s/,/./ig; $inde =~ s/,/./ig; $innode =~ s/,/./ig; $deb =~ s/,/./ig;		   
 		   
-		   $montoRestante = $pres+$impago+$inde+$innode-$deb;
-		   $montosRestantesPPIArray[$i] = $montoRestante;
-		   $ppiArray[$i]=$linea;
-		   $i++;
+		   $enFecha = "S";
+		   $anioLinea = $3;
+		   $mesLinea = $4;
+			# Se verifica para filtrar por fecha
+			if($filtros{"ANIO"} && $filtros{"ANIO"} ne "" && $filtros{"ANIO_HASTA"} && $filtros{"ANIO_HASTA"} ne "" && $filtros{"MES"} && $filtros{"MES"} ne "" && $filtros{"MES_HASTA"} && $filtros{"MES_HASTA"} ne "") {
+				# Se definio un RANGO de busqueda por fecha
+				if($anioLinea >= $filtros{"ANIO"} && $anioLinea <= $filtros{"ANIO_HASTA"}) {
+					# Se encuentra en el rango de años
+					if($filtros{"ANIO"} == $filtros{"ANIO_HASTA"} && $anioLinea == $filtros{"ANIO"}) {
+						# El rango es dentro del mismo año
+						if ($mesLinea >= $filtros{"MES"} && $mesLinea <= $filtros{"MES_HASTA"}) {
+							$enFecha = "S";
+						} else {
+							$enFecha = "N";
+						}
+					} elsif($anioLinea > $filtros{"ANIO"} && $anioLinea < $filtros{"ANIO_HASTA"}) {
+						# Todos los meses son validos
+						$enFecha = "S";
+					} elsif($anioLinea == $filtros{"ANIO"} && $mesLinea >= $filtros{"MES"}) {
+						$enFecha = "S";
+					} elsif($anioLinea == $filtros{"ANIO_HASTA"} && $mesLinea <= $filtros{"MES_HASTA"}) {
+						$enFecha = "S";					
+					} else {
+						$enFecha = "N";
+					}
+				}
+			} elsif($filtros{"ANIO"} && $filtros{"ANIO"} && $filtros{"MES"} && $filtros{"MES"} ne "")  {
+				# Se definio un PERIODO de busqueda por fecha
+				if($anioLinea == $filtros{"ANIO"} && $mesLinea == $filtros{"MES"}) {
+					$enFecha = "S";
+				} else {
+					$enFecha = "N";
+				}
+			} elsif($filtros{"ANIO"} && $filtros{"ANIO"} ne "") {
+				# Se definio un AÑO de busqueda por fecha
+				if($anioLinea == $filtros{"ANIO"}) {
+					$enFecha = "S";
+				} else {
+					$enFecha = "N";
+				}
+			}
+
+		   if($enFecha eq "S") {
+			   ########## 2DO PASO ########## 
+			   # Se calcula el MONTO RESTANTE del Archivo Maestro
+			   $pres = $10; $impago = $11; $inde = $12; $innode = $13; $deb = $14; 
+			   $pres =~ s/,/./ig; $impago =~ s/,/./ig; $inde =~ s/,/./ig; $innode =~ s/,/./ig; $deb =~ s/,/./ig;		   
+			   
+			   $montoRestante = $pres+$impago+$inde+$innode-$deb;
+			   $montosRestantesPPIArray[$i] = $montoRestante;
+			   $ppiArray[$i]=$linea;
+			   $i++;
+		   }
 		}
 	}
 	
 	close(PPIFILE);
 	
-	# 3ER PASO
-	# Se leen todos las entradas del Archivo de PRESTAMOS y se comparan con las filtradas del MAESTRO
+	########## 3ER PASO ##########
+	# Se leen todos los registros del Archivo de Prestamos y se comparan con los filtrados del Archivo Maestro
 	open(PRESTAMOS,$paths{"PRESTAMOS"}.$filtros{"PAIS_ID"});
 	@prestamosFileArray = <PRESTAMOS>;
 	close(PRESTAMOS);
@@ -324,31 +352,31 @@ while($consultar eq 'S') {
 			$anioPrestamo = $3;
 			$mesPrestamo = $4;
 
-			# Se buscan los registros del Archivo de PRESTAMOS que coincidan con el de MAESTRO
+			# Se buscan los registros del Archivo de Prestamos que coincidan con el del Archivo Maestro
 			$diaPrestamo = 0;
 			$fechaGrabacion = "";
 			$encontroPrestamo = "N";
 			foreach $lineaPrestamos (@prestamosFileArray) {
-				if($lineaPrestamos =~ m#(\w+);($anioPrestamo);($mesPrestamo);(\d+);(\w+);($codPrestamo);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\w+);(.+);(\d\d/\d\d/\d\d\d\d);(\w+)#) {
+				if($lineaPrestamos =~ m#(\w+);($anioPrestamo);($mesPrestamo);(\d+);(\w+);($codPrestamo);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\w*);(.*);(\d\d/\d\d/\d\d\d\d);(\w*)#) {
 				   #$1 SIS_ID ; $2 CTB_ANIO ; $3 CTB_MES ; $4 CTB_DIA ; $5 CTB_ESTADO ; $6 PRES_ID ; $7 MT_PRES ; $8 MT_IMPAGO ; $9 MT_INDE ; $10 MT_INNODE
 				   #$11 MT_DEB ; $12 MT_REST ; $13 PRES_CLI_ID ; $14 PRES_CLI ; $15 INS_FE ; $16 INS_USER
 				   $encontroPrestamo = "S";
 				   
 				   # Verifica que el dia sea mayor al anterior encontrado. Si el dia es igual, corrobora la fecha de grabacion
 				   if($4 >= $diaPrestamo) {
-				    # TODO: COMPARAR POR FECHA
-						$diaPrestamo = $4;
-						push(@prestamosArray, $lineaPrestamos);
-						$restante = $12;
-						$restante =~ s/,/./ig;
-						push(@montosRestantesPrestamosArray, $restante);
+				   	# TODO: Comparar por FECHA si dia de prestamos es el mismo
+					$diaPrestamo = $4;
+					$prestamosArray[$j] = $lineaPrestamos;
+					$restante = $12;
+					$restante =~ s/,/./ig;
+					$montosRestantesPrestamosArray[$j] = $restante;
 				   }
 				} 
 			}
 			
 			if($encontroPrestamo eq "N") {
-				push(@prestamosArray, "");
-				push(@montosRestantesPrestamosArray, "");
+				$prestamosArray[$j] = "";
+				$montosRestantesPrestamosArray[$j] = "";
 			}
 			$j++;
 		}
@@ -360,132 +388,205 @@ while($consultar eq 'S') {
 		$lineaReporte = "";
 	}
 
-	# 4TO PASO
+	########## 4TO PASO ##########
 	@reporte = ();
 	@reporteComparacion = ();
 	@recalculo = ();
 
-	# Se generan arrays con parametros a imprimir
+	# Se generan arrays con lineas de reporte para imprimir
 	$max = @montosRestantesPPIArray;
 	for ($ind = 0; $ind < $max; $ind++ ) {
-		$entradaPPI = $ppiArray[$ind];
-		$entradaPrestamos = $prestamosArray[$ind];
 		
-		$rep = "CODPRES;CODCLI;ECM;ECP;RESTM;RESTP;RECOMENDACION";
-		$rec = "SIS_ID;CTB_ANIO;CTB_MES;CTB_DIA;CTB_ESTADO;PRES_ID;MT_PRES;MT_IMPAGO;MT_INDE;MT_INNODE;MT_DEB;MT_REST;PRES_CLI_ID;PRES_CLI;INS_FE;INS_USER";
-		$ecm = "";
-		$ecp = "";
-		$agregarEntrada = "S";
+		$montoRestantePPI = $montosRestantesPPIArray[$ind]; 
+		$montoRestantePPI =~ s/\./,/ig; # Se reemplaza el . decimal por , para mostrarlo por pantalla
 
-		if( $entradaPPI =~ m#(\w+);(\d+);(\d+);(\d+);(\d+);(\w+);(\d\d/\d\d/\d\d\d\d);(\w+);(\w+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+)#) {
-			$sisId = $2;
-			$ctbAnio = $3;
-			$ctbMes = $4;
-			$ecm = $6;
-			$codPres = $8;
-			$mtpres = $10;
-			$mtimpago = $11;
-			$mtinde = $12;
-			$mtinnode = $13;
-			$mtdeb = $14;
+		$montoRestantePrestamos = $montosRestantesPrestamosArray[$ind]; 
+		$montoRestantePrestamos =~ s/\./,/ig; # Se reemplaza el . decimal por , para mostrarlo por pantalla			
+
+		if($filtros{"TIPO_CONSULTA"} == 1) {
+			$entradaPPI = $ppiArray[$ind];
+			$entradaPrestamos = $prestamosArray[$ind];
 			
-			$rep =~ s/CODPRES/$codPres/ig;
-			$rep =~ s/ECM/$ecm/ig;
-			$rep =~ s/RESTM/$montosRestantesPPIArray[$ind]/ig;
-		
-			$rec =~ s/SIS_ID/$sisId/ig;
-			$rec =~ s/CTB_ANIO/$ctbAnio/ig;
-			$rec =~ s/CTB_MES/$ctbMes/ig;
-			$rec =~ s/CTB_ESTADO/$ecm/ig;
-			$rec =~ s/PRES_ID/$codPres/ig;
-			$rec =~ s/MT_PRES/$mtpres/ig;
-			$rec =~ s/MT_IMPAGO/$mtimpago/ig;
-			$rec =~ s/MT_INDE/$mtinde/ig;
-			$rec =~ s/MT_INNODE/$mtinnode/ig;
-			$rec =~ s/MT_DEB/$mtdeb/ig;
-			$rec =~ s/MT_REST/$montosRestantesPPIArray[$ind]/ig;
-		}	
-		if($entradaPrestamos =~ m#(\w+);(\d+);(\d+);(\d+);(\w+);(\w+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\w+);(.+);(\d\d/\d\d/\d\d\d\d);(\w+)#) {
-			$diaContable = $4;
-			$ecp = $5;
-			$codCliente = $13;
-			$cli = $14;
+			$rep = "CODPRES;CODCLI;ECM;ECP;RESTM;RESTP;RECOMENDACION";
+			$rec = "SIS_ID;CTB_ANIO;CTB_MES;CTB_DIA;CTB_ESTADO;PRES_ID;MT_PRES;MT_IMPAGO;MT_INDE;MT_INNODE;MT_DEB;MT_REST;PRES_CLI_ID;PRES_CLI;INS_FE;INS_USER";
 			
-			$rep =~ s/CODCLI/$codCliente/ig;
-			$rep =~ s/ECP/$ecp/ig;
-			$rep =~ s/RESTP/$montosRestantesPrestamosArray[$ind]/ig;
+			$ecm = "";
+			$ecp = "";
 			
-			$rec =~ s/CTB_DIA/$diaContable/ig;
-			$rec =~ s/PRES_CLI_ID/$codCliente/ig;
-			$rec =~ s/PRES_CLI/$cli/ig;
+			$agregarEntrada = "S";
+			
+			if($entradaPPI =~ m#(\w+);(\d+);(\d+);(\d+);(\d+);(\w+);(\d\d/\d\d/\d\d\d\d);(\w+);(\w+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+)#) {
+				$sisId = $2;
+				$ctbAnio = $3;
+				$ctbMes = $4;
+				$ecm = $6;
+				$codPres = $8;
+				$mtpres = $10;
+				$mtimpago = $11;
+				$mtinde = $12;
+				$mtinnode = $13;
+				$mtdeb = $14;
+			
+				$rep =~ s/CODPRES/$codPres/ig;
+				$rep =~ s/ECM/$ecm/ig;
+				$rep =~ s/RESTM/$montoRestantePPI/ig;
+			
+				$rec =~ s/SIS_ID/$sisId/ig;
+				$rec =~ s/CTB_ANIO/$ctbAnio/ig;
+				$rec =~ s/CTB_MES/$ctbMes/ig;
+				$rec =~ s/CTB_ESTADO/$ecm/ig;
+				$rec =~ s/PRES_ID/$codPres/ig;
+				$rec =~ s/MT_PRES/$mtpres/ig;
+				$rec =~ s/MT_IMPAGO/$mtimpago/ig;
+				$rec =~ s/MT_INDE/$mtinde/ig;
+				$rec =~ s/MT_INNODE/$mtinnode/ig;
+				$rec =~ s/MT_DEB/$mtdeb/ig;
+				$rec =~ s/MT_REST/$montoRestantePPI/ig;
+			}	
+
+			if($entradaPrestamos =~ m#(\w+);(\d+);(\d+);(\d+);(\w+);(\w+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\w*);(.*);(\d\d/\d\d/\d\d\d\d);(\w*)#) {
+				$diaContable = $4;
+				$ecp = $5;
+				$codCliente = $13;
+				$cli = $14;
+
+				$rep =~ s/CODCLI/$codCliente/ig;
+				$rep =~ s/ECP/$ecp/ig;
+				$rep =~ s/RESTP/$montoRestantePrestamos/ig;
+				
+				$rec =~ s/CTB_DIA/$diaContable/ig;
+				$rec =~ s/PRES_CLI_ID/$codCliente/ig;
+				$rec =~ s/PRES_CLI/$cli/ig;
+				
+			} else {
+				$agregarEntrada = "N";
+			}
+			
+			if($agregarEntrada eq "S") {
+				# Se calcula la recomendacion y si es RECALCULO se agrega a la lista
+				if(($ecm eq "SMOR" && $ecp ne "SMOR") || ($montosRestantesPPIArray[$ind] < $montosRestantesPrestamosArray[$ind])) {
+					$rep =~ s/RECOMENDACION/RECALCULO/ig;
+					push(@recalculo, $rec);
+				} else {
+					$rep =~ s/RECOMENDACION/BUENO/ig;
+				}
+
+				push(@reporte,$rep);
+			}
 			
 		} else {
-			$agregarEntrada = "N";
-		}
 		
-		if($agregarEntrada eq "S") {
-			# Se calcula la recomendacion
-			if(($ecm eq "SMOR" && $ecp ne "SMOR") || ($montosRestantesPPIArray[$ind] < $montosRestantesPrestamosArray[$ind])) {
-				$rep =~ s/RECOMENDACION/RECALCULO/ig;
-			} else {
-				$rep =~ s/RECOMENDACION/BUENO/ig;
+			if($montosRestantesPrestamosArray[$ind] ne "") {
+				$dif = $montosRestantesPPIArray[$ind] - $montosRestantesPrestamosArray[$ind];
+				$dif = abs($dif);
+				
+				if($filtros{"TIPO_CONSULTA"} == 2) {
+					# La diferencia es en %
+					$dif = $dif*100/$montosRestantesPPIArray[$ind];
+				}
+				
+				if($dif >= $filtros{'VALOR_COMPARACION'}) {
+					$dif =~ s/\./,/ig; # Se cambia . por ,
+					push(@reporteComparacion, "$ind;$montoRestantePPI;$montoRestantePrestamos;$dif");
+				}
 			}
-
-			push(@reporte,$rep);
-			push(@recalculo, $rec);
-		}
-		
-		$dif = $montosRestantesPPIArray[$ind] - $montosRestantesPrestamosArray[$ind];
-		if($dif>$filtros{'VALOR_COMPARACION'}) {
-			push(@reporteComparacion, "$ind;$montosRestantesPPIArray[$ind];$montosRestantesPrestamosArray[$ind];$dif");
 		}
 	}
 	
-	# Imprime en pantalla la consulta
+	########## Imprime en pantalla la consulta ##########
+	print "\nTipo de consulta: $filtros{'TIPO_CONSULTA'} \n";
+	print "Pais: $filtros{'PAIS_NOMBRE'} \n";
+
+	if($filtros{'SISTEMA_ID'} && $filtros{'SISTEMA_ID'} ne "") {
+		print "Sistema: $filtros{'SISTEMA_ID'} \n";
+	}
+	if($filtros{"ANIO"} && $filtros{"ANIO"} ne "") {
+		print "Anio: $filtros{'ANIO'} \n";
+	}
+	if($filtros{"MES"} && $filtros{"MES"} ne "") {
+		print "Mes: $filtros{'MES'} \n";
+	}
+	if($filtros{"ANIO_HASTA"} && $filtros{"ANIO_HASTA"} ne "") {
+		print "Anio hasta: $filtros{'ANIO_HASTA'} \n";
+	}
+	if($filtros{"MES_HASTA"} && $filtros{"MES_HASTA"} ne "") {
+		print "Mes hasta: $filtros{'MES_HASTA'} \n";
+	}
+	if($filtros{'VALOR_COMPARACION'} && $filtros{'VALOR_COMPARACION'} ne "") {
+		print "Diferencia: $filtros{'VALOR_COMPARACION'} \n";	
+	}
+
 	if($filtros{"TIPO_CONSULTA"} == 1) {
 		printf("%-14s%-13s%-24s%-21s%-23s%-20s%-14s\n","Cod. Prestamo","Cod. Cliente","Estado contable Maestro","Estado contable Pais","Monto restante Maestro","Monto restante Pais","Recomendacion");
 		foreach $entradaRepo(@reporte) {
 			@entradaRepoArray = split(";", $entradaRepo);
 			printf("%-14s%-13s%-24s%-21s%-23s%-20s%-14s\n",$entradaRepoArray[0],$entradaRepoArray[1],$entradaRepoArray[2],$entradaRepoArray[3],$entradaRepoArray[4],$entradaRepoArray[5],$entradaRepoArray[6]);
 		}
+		$cantidadElementosReporte = @reporte;
 	} else {
 		printf("%-10s%-10s%-10s%-12s\n","Prestamo","Maestro","Pais","Diferencia");
 		foreach $entradaComparacion(@reporteComparacion) {
 			@entradaComparacionArray = split(";", $entradaComparacion);
 			printf("%-10s%-10s%-10s%-12s\n",$entradaComparacionArray[0],$entradaComparacionArray[1],$entradaComparacionArray[2],$entradaComparacionArray[3]);
 		}
+		$cantidadElementosReporte = @reporteComparacion;
 	}
+	print "Cantidad de elementos: $cantidadElementosReporte\n";
 
-	# Guarda reporte si corresponde
+
+	########## Se guarda el reporte, si corresponde ##########
 	if($filtros{"GUARDAR_CONSULTA"} eq "S") {
-		print "Se guardara el reporte \n";
+		print "\nGuardando el reporte en $paths{'REPORTE'}.$it...\n";
 	   	open(REPORTE,">".$paths{"REPORTE"}.$it);
-		   
+		
+		print REPORTE "Tipo de Consulta: $filtros{'TIPO_CONSULTA'}\n";
+		print REPORTE "Pais: $filtros{'PAIS_NOMBRE'}\n";
+		if($filtros{'SISTEMA_ID'} & $filtros{'SISTEMA_ID'} ne "") {
+		   print REPORTE "Sistema: $filtros{'SISTEMA_ID'}\n";
+		}		
+		if($filtros{"ANIO"} && $filtros{"ANIO"} ne "") {
+		   print REPORTE "Anio: $filtros{'ANIO'} \n";
+		}
+		if($filtros{"MES"} && $filtros{"MES"} ne "") {
+		   print REPORTE "Mes: $filtros{'MES'} \n";
+		}
+		if($filtros{"ANIO_HASTA"} && $filtros{"ANIO_HASTA"} ne "") {
+		   print REPORTE "Anio hasta: $filtros{'ANIO_HASTA'} \n";
+		}
+		if($filtros{"MES_HASTA"} && $filtros{"MES_HASTA"} ne "") {
+		   print REPORTE "Mes hasta: $filtros{'MES_HASTA'} \n";
+		}
+   
 		if($filtros{"TIPO_CONSULTA"} == 1) {
 			printf REPORTE ("%-14s%-13s%-24s%-21s%-23s%-20s%-14s\n","Cod. Prestamo","Cod. Cliente","Estado contable Maestro","Estado contable Pais","Monto restante Maestro","Monto restante Pais","Recomendacion");
 			foreach $entradaRepo(@reporte) {
 				@entradaRepoArray = split(";", $entradaRepo);
 				printf REPORTE ("%-14s%-13s%-24s%-21s%-23s%-20s%-14s\n",$entradaRepoArray[0],$entradaRepoArray[1],$entradaRepoArray[2],$entradaRepoArray[3],$entradaRepoArray[4],$entradaRepoArray[5],$entradaRepoArray[6]);
 			}
+			$cantidadElementosReporte = @reporte;
 		} else {
+			print REPORTE "Diferencia: $filtros{'VALOR_COMPARACION'}\n";
 			printf REPORTE ("%-10s%-10s%-10s%-12s\n","Prestamo","Maestro","Pais","Diferencia");
 			foreach $entradaComparacion(@reporteComparacion) {
 				@entradaComparacionArray = split(";", $entradaComparacion);
 				printf REPORTE ("%-10s%-10s%-10s%-12s\n",$entradaComparacionArray[0],$entradaComparacionArray[1],$entradaComparacionArray[2],$entradaComparacionArray[3]);
 			}
+			$cantidadElementosReporte = @reporteComparacion;
 		}
+		print REPORTE "Cantidad de elementos: $cantidadElementosReporte\n";
 		
 		close(REPORTE);
 	}
 
-	# 5TO PASO (SOLO consulta 1): Guardado de RECALCULO
+	########## 5TO PASO ########## 
+	# Guardado de RECALCULO (SOLO consulta 1)
 	if($filtros{"TIPO_CONSULTA"} == 1) {	
 		print "\nDesea grabar el recalculo? [S/N]\n";
 		$guardarRecalculo = <STDIN>; 
 		chomp($guardarRecalculo);
 		$guardarRecalculo = uc($guardarRecalculo);
 		if($guardarRecalculo eq "S") {
-			print "Se guardara el recalculo \n";
+			print "\nGuardando el recalculo ...\n";
 			open(RECALCULO,">>".$paths{"RECALCULO"}.$filtros{"PAIS_ID"});
 			foreach $entradaRec (@recalculo) {
 				print RECALCULO "$entradaRec\n";
@@ -506,4 +607,3 @@ while($consultar eq 'S') {
 # Fin del comando, se limpia la terminal
 system("clear");
 exit 0;
-
