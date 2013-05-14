@@ -26,8 +26,7 @@ fi
 
 BINDIR=
 confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR')
-confvars=${confdirs[@]}
-confvars+=('LOGEXT' 'LOGSIZE' 'DATASIZE')
+confvars=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR' 'LOGEXT' 'LOGSIZE' 'DATASIZE')
 badvars=()
 for var in ${confvars[@]}; do
 	== `grep "^${var}=" ${CONFFILE} | cut -d= -f1,2`
