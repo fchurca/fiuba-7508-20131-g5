@@ -5,7 +5,7 @@ if [ $# -lt 2 ]; then
 	exit 1
 fi
 if [ ${LOGFILE}x == x ]; then
-	LOGFILE="${LOGDIR}/$1${LOGEXT}"
+	LOGFILE="${LOGDIR}/$1.${LOGEXT}"
 	if [ -f ${LOGFILE} -a ! -w ${LOGFILE} ]; then
 		echo "No se puede escribir en el archivo de log, no se puede continuar:" >&2
 		echo ${LOGFILE} >&2

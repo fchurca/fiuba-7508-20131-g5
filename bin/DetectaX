@@ -76,7 +76,7 @@ do
 
 	if [ "$(ls -A "$ACEPDIR")" ]
 	then
-		StartX InterpreteX
+		StartX InterpreteX > /dev/null
 	fi
 	sleep $TESPERA
 done

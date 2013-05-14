@@ -5,20 +5,21 @@
 
 
 # Verificacion de inicializacion de ambiente
-# TODO: para pruebas locales en WIN: ELIMINAR
-$maedir = "C:/Users/pivancic/Desktop/so/datos/";
-$procdir = "C:/Users/pivancic/Desktop/so/datos/";
-$repodir = "C:/Users/pivancic/Desktop/so/datos/";
 
-#TODO: para pruebas locales en MINT. ELIMINAR
+# TODO: para pruebas locales en WIN. ELIMINAR
+#$maedir = "C:/Users/pivancic/Desktop/so/datos/";
+#$procdir = "C:/Users/pivancic/Desktop/so/datos/";
+#$repodir = "C:/Users/pivancic/Desktop/so/datos/";
+
+# TODO: para pruebas locales en MINT. ELIMINAR
 #$maedir = $ENV{"HOME"}."/7508/archivos-test";
 #$procdir = $ENV{"HOME"}."/7508/archivos-test";
 #$repodir = $ENV{"HOME"}."/7508/archivos-test";
 
-# TODO: DESCOMENTAR
-#$maedir = $ENV{"MAEDIR"};
-#$procdir = $ENV{"PROCDIR"};
-#$repodir = $ENV{"REPODIR"};
+# TODO: para tp. DESCOMENTAR
+$maedir = $ENV{"MAEDIR"};
+$procdir = $ENV{"PROCDIR"};
+$repodir = $ENV{"REPODIR"};
 
 if(!$maedir || !$procdir || !$repodir) {
    print "Las variables de ambiente no estan inicializadas. Se cortara la ejecucion del comando. \n";
@@ -30,7 +31,7 @@ $paths{"PS"} = $maedir."/p-s.mae";
 $paths{"PPI"} = $maedir."/PPI.mae";
 $paths{"PRESTAMOS"} = $procdir."/PRESTAMOS."; # Cuando se sepa el pais se le debe agregar la extension
 $paths{"REPORTE"} = $repodir."/ReporteX."; # La extension se genera al momento de guardado
-$paths{"RECALCULO"} = $repodir."/RECALCULO."; # # Cuando se sepa el pais se le debe agregar la extension
+$paths{"RECALCULO"} = $repodir."/RECALCULO."; # Cuando se sepa el pais se le debe agregar la extension
 
 
 # TODO: Verificar que el comando no se este corriendo.
@@ -47,7 +48,7 @@ sub menu {
    print "2. Diferencia (en valor absoluto) mayor al " . 'x%.' . "\n";
    print "3. Diferencia (en valor absoluto) mayor al " . 'x$.' . "\n";
    print "-a. Menu de ayuda. \n";
-   print "Ingrese el tipos de consulta que desea realizar con sus parametros:\n";
+   print "Ingrese el tipo de consulta que desea realizar con sus parametros:\n";
 }
 
 
