@@ -2,7 +2,7 @@
 
 ########TODO: Documentar!
 
-#! Desde acá loguear a stderr
+# Desde acá loguear a stderr
 if [ "$1"x == -dx ]; then
 	grupo=`pwd` # debug
 else
@@ -26,7 +26,8 @@ fi
 
 BINDIR=
 confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR')
-confvars=(${confdirs[@]} 'LOGEXT' 'LOGSIZE' 'DATASIZE')
+confvars=${confdirs[@]}
+confvars+=('LOGEXT' 'LOGSIZE' 'DATASIZE')
 badvars=()
 for var in ${confvars[@]}; do
 	== `grep "^${var}=" ${CONFFILE} | cut -d= -f1,2`
@@ -54,9 +55,10 @@ PATH+=":${BINDIR}"
 export LOGDIR
 export LOGEXT
 
-#TODO: Si está, pasar stderr a log
-# (función log que loguee $1 a logfile?)
+# Ahora sí podemos loguear a GlogX
 GlogX InicioX 'Inicio de Ejecución'
+GlogX InicioX "LOGDIR=${LOGDIR}"
+GlogX InicioX "LOGEXT=${LOGEXT}"
 
 #### Verificación de instalación
 ## Verificación de comandos
@@ -75,6 +77,7 @@ for c in ${comandos[@]}; do
 		comandosOK+=($c)
 	fi
 done
+
 ####TODO: Carpetas escribibles
 ## Reporte de situación
 echo "Comandos registrados:" >&2
@@ -108,7 +111,7 @@ elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 			fi
 		done
 		if [ "${bad}x" != "x" ]; then
-			GlogX "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}"
+			GlogX InicioX "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}"
 			echo "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}" >&2
 			return 3
 		fi
@@ -116,7 +119,8 @@ elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 		return 2
 	fi
 fi
-
+GlogX InicioX "Todos los comandos OK"
+echo "Todos los comandos OK" >&2
 ####TODO: Verificar archivos maestros
 # Existan legibles
 
@@ -127,26 +131,33 @@ fi
 
 #### Exporto variables de entorno
 #### TODO: Traer CANLOOP, TESPERA más lindo
-echo "CANLOOP?"
+echo "Cantidad de iteraciones para DetectaX?"
 read CANLOOP
-echo "TESPERA?"
+echo "Tiempo en segundos entre iteraciones?"
 read TESPERA
 
+GlogX InicioX "Exportando variables de entorno:"
+echo "Exportando variables de entorno:" >&2
 confvars+=('CANLOOP' 'TESPERA' 'PATH' 'CONFDIR' 'grupo')
 for var in ${confvars[@]}; do
 	== "export ${var}"
 	== "echo ${var}=\${${var}}"
-	== "GlogX InicioX '${var}=\${${var}}'"
+	== 'GlogX InicioX "'${var}'=${'${var}'}"'
 done
 =!
+
+GlogX InicioX "Variables de entorno exportadas"
+echo "Variables de entorno exportadas" >&2
 
 #### Ejecución de DetectaX
 echo "Desea efectuar la activación de DetectaX? (S/n)"
 read ans
 if [ "${ans}x" == sx -o "${ans}x" == Sx ]; then
 	GlogX InicioX "Iniciando DetectaX"
+	echo "Iniciando DetectaX"
 	StartX DetectaX
 else
 	GlogX InicioX "DetectaX no iniciado"
+	echo "DetectaX no iniciado"
 fi
 
