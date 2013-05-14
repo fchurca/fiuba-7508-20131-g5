@@ -19,6 +19,7 @@ LOGEXT=.log
 DATASIZE=100
 LOGSIZE=400
 
+PATH+=":${CURRENTDIR}"
 
 #######################################################
 
@@ -28,27 +29,18 @@ LOGSIZE=400
 #Listar archivos dentro de un directorio
 listFiles() {
 	dir=$1
-	if [ -n "$dir" ]
+	if [ -n "$dir" -a -d "$dir" ]
 	then
-		if [ -d "$dir" ]
-		then
-			ls "$dir"
-		fi
+		ls "$dir"
 	fi
 }
 
-function == {
-if [ ${CONTROLX_TMPFILE}x == x ]; then
-	CONTROLX_TMPFILE=`mktemp`
+LIB=LibX.sh
+if [ ! -r ${LIB} ]; then
+	echo "Biblioteca no encontrada, no se puede continuar: ${LIB}" >&2
+	return 1;
 fi
-echo $1 >> ${CONTROLX_TMPFILE}
-}
-
-function =! {
-source ${CONTROLX_TMPFILE}
-rm ${CONTROLX_TMPFILE}
-CONTROLX_TMPFILE=
-}
+source ${LIB}
 
 #Mostar los datos de la instalación previa
 printPreviousInstalationData() {
@@ -135,18 +127,18 @@ Perl versión: $version"
 #Definir espacio mínimo de disco requerido
 defineMinimumDiskSpace() {
 	local end=0
-	echo "Defina el espacio mínimo libre para el arribo de archivos externos en Mbytes ($DATASIZE):"
+	echo "Defina el espacio mínimo libre para el arribo de archivos externos en MBytes ($DATASIZE):"
 	while [ $end -eq 0 ]
 	do
 		read DATASIZE
 		if [ ! -z "${DATASIZE##*[!0-9]*}" ]
 		then
-			local size=$(df -k ${HOME} | tail -1 | awk {'print $2'})
+			local size=$(df -m ${HOME} | tail -1 | awk {'print $2'})
 			if [ $DATASIZE -gt $size ]
 			then
 				echo "Insuficiente espacio en disco.
-Espacio disponible: $size Mb
-Espacio requerido $DATASIZE Mb
+Espacio disponible: $size MB
+Espacio requerido $DATASIZE MB
 Cancele la instalación e intentelo más tarde o vuelva a intentarlo con otro valor."
 			else
 				end=1
@@ -269,12 +261,7 @@ installationConfiguration() {
 
 #Reemplazar si existe el dato de configuración sino grabarlo
 findReplaceAndWrite() {
-	local day=$(date +%d)
-	local month=$(date +%m)
-	local year=$(date +%Y)
-	local hour=$(date +%H)
-	local minutes=$(date +%M)
-	lineToWrite="$1=$2=$3=$day/$month/$year $hour:$minutes"
+	lineToWrite="$1=$2=$3="`date -u`
 	exists=1
 	if [ -f "$CONFDIR/$INSTALXCONF" ]
 	then
@@ -320,22 +307,22 @@ installationProcess() {
 	mkdir -p "$LOGDIR"
 	mkdir -p "$REPODIR"
 	echo 'Instalando archivos maestros'
-	source MoverX PPI.mae "$CURRENTDIR" "$MAEDIR"
-	source MoverX p-s.mae "$CURRENTDIR" "$MAEDIR"
+	MoverX PPI.mae "$CURRENTDIR" "$MAEDIR"
+	MoverX p-s.mae "$CURRENTDIR" "$MAEDIR"
 	echo 'Instalando tablas de configuración'
-	source MoverX T2.tab "$CURRENTDIR" "$CONFDIR"
-	source MoverX T1.tab "$CURRENTDIR" "$CONFDIR"
+	MoverX T2.tab "$CURRENTDIR" "$CONFDIR"
+	MoverX T1.tab "$CURRENTDIR" "$CONFDIR"
 	echo 'Instalando programas y funciones'
-	source MoverX InicioX "$CURRENTDIR" "$BINDIR"
-	source MoverX DetectaX "$CURRENTDIR" "$BINDIR"
-	source MoverX InterpreteX "$CURRENTDIR" "$BINDIR"
-	source MoverX StartX "$CURRENTDIR" "$BINDIR"
-	source MoverX StopX "$CURRENTDIR" "$BINDIR"
-	source MoverX ReporteX "$CURRENTDIR" "$BINDIR"
-	source MoverX VlogX "$CURRENTDIR" "$BINDIR"
-	source MoverX GlogX "$CURRENTDIR" "$BINDIR"
-	source MoverX LibX.sh "$CURRENTDIR" "$MAINDIR"
-	source MoverX MoverX "$CURRENTDIR" "$BINDIR"
+	MoverX InicioX "$CURRENTDIR" "$BINDIR"
+	MoverX DetectaX "$CURRENTDIR" "$BINDIR"
+	MoverX InterpreteX "$CURRENTDIR" "$BINDIR"
+	MoverX StartX "$CURRENTDIR" "$BINDIR"
+	MoverX StopX "$CURRENTDIR" "$BINDIR"
+	MoverX ReporteX "$CURRENTDIR" "$BINDIR"
+	MoverX VlogX "$CURRENTDIR" "$BINDIR"
+	MoverX GlogX "$CURRENTDIR" "$BINDIR"
+	MoverX LibX.sh "$CURRENTDIR" "$MAINDIR"
+	MoverX MoverX "$CURRENTDIR" "$BINDIR"
 	echo 'Actualizando la configuración del sistema'
 	writeSystemConfiguration
 	echo 'Instalación concluida'
@@ -411,8 +398,8 @@ else
 		perlIsInstalled=$?
 		if [ $perlIsInstalled -eq 0 ]
 		then
-			configurated=0
-			while [ $configurated -eq 0 ]
+			configured=0
+			while [ $configured -eq 0 ]
 			do
 				installationConfiguration
 				clear
@@ -421,7 +408,7 @@ else
 				getYesOrNoAnswer
 				if [ "$answer" = "si" ]
 				then
-					configurated=1
+					configured=1
 				elif [ "$answer" = "no" ]
 				then
 					clear

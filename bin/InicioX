@@ -14,7 +14,7 @@ if [ ! -r ${LIB} ]; then
 	echo "Biblioteca no encontrada, no se puede continuar: ${LIB}" >&2
 	return 1;
 fi
-source ${grupo}/LibX.sh
+source ${LIB}
 
 CONFDIR=${grupo}/conf
 CONFFILE=${CONFDIR}/InstalX.conf
