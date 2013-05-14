@@ -1,36 +1,31 @@
-Instrucciones de preparación para la instalación
-
-1- Insertar el pendrive con el contenido del tp.
-2- Crear en el directori ocorriente un directorio de trabajo
-3- Copiar el archivo tp.tgz en ese directorio.
-4- Descomprimir el tp.tgz de manera de generar un tp.tar
-5- Extraer los archivos del tar.
-
-
-Instrucciones para la instalación
-
-1- Abrir una terminal en el directorio de trabajo.
-2- Escribir: ./InstalX
-3- Seguir las indicaciones del instalador.
+- Instrucciones de preparación para la instalación
+1. Insertar el pendrive con el contenido del tp.
+2. Crear en el directorio corriente un directorio de trabajo.
+3. Copiar el archivo .tgz en ese directorio.
+4. Descomprimir el .tgz de manera de generar un .tar (con el comando "tar xzf <miArchivo>.tar.gz").
+5. Extraer los archivos del tar.
 
 
-Resultado de la instalación
+- Instrucciones para la instalación
+1. Abrir una terminal en el directorio de trabajo.
+2. Escribir: "source InstalX".
+3. Seguir las indicaciones del instalador.
 
+
+- Resultado de la instalación
 La instalación crea todos los directorios y archivos necesarios para la correcta ejecución del sistema CONTROLX en la dirección especificada en la instalación.
 
 
-Primeros pasos de ejecución
-
-1- Abrir una terminal en el directorio donde se guardaron los ejecutables.
-2- Escribir: source InicioX
-3- Seguir las indicaciones de cada proceso.
-
-
-Ejecución manual de procesos
-
-Los procesos DetectaX, InterpreteX y ReporteX pueden ser llamados manualmente desde la consola, siempre y cuando no se estén ejecutando, escribiendo: StartX <comando>
+- Primeros pasos de ejecución
+1. Abrir una terminal en el directorio donde se guardaron los ejecutables (ésta es especificado por el usuario durante la instalación).
+2. Escribir: "source InicioX".
+3. Seguir las indicaciones de cada proceso.
 
 
-Detención de la ejecución de comandos
+- Ejecución de procesos
+Los procesos DetectaX, InterpreteX y ReporteX pueden ser llamados manualmente desde la consola, siempre y cuando no se estén ejecutando, escribiendo: "StartX <comando>"  (ó en el caso de ReporteX: "perl ReporteX" cuando es necesario).
+En el caso de DetectaX, al final del proceso de InicioX, se pedirá la usuario si quiere inicializarlo. En caso afirmativo, el demonio se estará corriendo en background.
 
-Para detener la ejecución de los procesos escribir en la consola: StopX <comando>
+
+- Detención de la ejecución de comandos
+Para detener la ejecución de los procesos escribir en la consola: "StopX <comando>".
