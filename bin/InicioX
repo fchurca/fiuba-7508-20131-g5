@@ -1,6 +1,8 @@
 #! /bin/bash
 
 ########TODO: Documentar!
+####TODO: Crear una consola al final? Así podemos ejecutar en vez de sourcear InicioX
+# O al menos ofrecer la posibilidad de entrar en una sesión interactiva
 
 # Desde acá loguear a stderr
 if [ "$1"x == -dx ]; then

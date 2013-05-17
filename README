@@ -1,0 +1,28 @@
+- Instrucciones para la instalación
+1. Obtener el comprimido de instalación 7508-20131-g5.tar.gz
+2. Abrir una terminal donde está el comprimido
+3. Extraer el comprimido:  tar xzf 7508-20131-g5.tar.gz
+4. Ejecutar el instalador:  ./InstalX
+5. Seguir las indicaciones del instalador
+
+
+- Resultado de la instalación
+La instalación crea todos los directorios y archivos necesarios para la correcta ejecución del sistema CONTROLX en la dirección especificada en la instalación.
+
+
+- Primeros pasos de ejecución
+1. Abrir una terminal en el directorio donde se guardaron los ejecutables (ésta es especificado por el usuario durante la instalación).
+2. Cargar el inicializador:  source InicioX
+3. Seguir las indicaciones de cada proceso.
+
+
+- Ejecución de procesos
+Los procesos DetectaX, InterpreteX y ReporteX pueden ser llamados manualmente desde la consola, siempre y cuando no se estén ejecutando, escribiendo:  StartX <comando>
+Por ejemplo:  StartX DetectaX
+En el caso de DetectaX, al final del proceso de InicioX, se pedirá la usuario si quiere inicializarlo. En caso afirmativo, el demonio se estará corriendo en background.
+
+
+- Detención de la ejecución de comandos
+Para detener la ejecución de los procesos escribir en la consola:  StopX <comando>
+Por ejemplo:  StopX DetectaX
+
