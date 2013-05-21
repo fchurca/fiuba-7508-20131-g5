@@ -131,11 +131,12 @@ echo "Todos los comandos OK" >&2
 ####TODO: Fallar si el entorno está inicializado
 
 #### Exporto variables de entorno
-#### TODO: Traer CANLOOP, TESPERA más lindo
 echo "Cantidad de iteraciones para DetectaX?"
-read CANLOOP
+getIntAnswer
+CANLOOP=$?
 echo "Tiempo en segundos entre iteraciones?"
-read TESPERA
+getIntAnswer
+TESPERA=$?
 
 GlogX InicioX "Exportando variables de entorno:"
 echo "Exportando variables de entorno:" >&2
@@ -151,9 +152,9 @@ GlogX InicioX "Variables de entorno exportadas"
 echo "Variables de entorno exportadas" >&2
 
 #### Ejecución de DetectaX
-echo "Desea efectuar la activación de DetectaX? (S/n)"
-read ans
-if [ "${ans}x" == sx -o "${ans}x" == Sx ]; then
+echo "Desea efectuar la activación de DetectaX? (sí/no)"
+getYesOrNoAnswer
+if [ "${answer}" = si ]; then
 	GlogX InicioX "Iniciando DetectaX"
 	echo "Iniciando DetectaX"
 	StartX DetectaX
