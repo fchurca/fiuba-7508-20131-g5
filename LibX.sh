@@ -5,6 +5,7 @@ if [ ${CONTROLX_TMPFILE}x == x ]; then
 fi
 echo $1 >> ${CONTROLX_TMPFILE}
 }
+
 function =! {
 if [ ${CONTROLX_TMPFILE}x != x ]; then
 	source ${CONTROLX_TMPFILE}
@@ -14,15 +15,14 @@ fi
 }
 
 function getIntAnswer {
-ans=
+local ans=
 while [ -z "${ans##*[!0-9]*}" ]; do
 	read ans
-	if [ ! -z "${ans##*[!0-9]*}" ]; then
-		return $ans
-	else
+	if [ -z "${ans##*[!0-9]*}" ]; then
 		echo "Por favor, ingrese un número entero"
 	fi
 done
+return $ans
 }
 
 #Obtener respuesta Sí o No
@@ -32,7 +32,7 @@ answer=
 while [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]; do
 	read answer
 	# tr trabaja de a bytes, y, aunque funciona así, posiblemente sea mejor cambiar eso con un sed: sed 's/[[:upper:]]*/\L&/;s/í/i/g'
-	answer=$(echo $answer | tr [:upper:]Íí [:lower:]ii)
+	answer=$(tr [:upper:]Íí [:lower:]ii <<< $answer)
 	if [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]; then
 		echo "Por favor responda sí o no"
 	fi
@@ -40,7 +40,7 @@ done
 }
 
 # Exportamos las funciones
-funs=(== =! getYesOrNoAnswer)
+funs=(== =! getIntAnswer getYesOrNoAnswer)
 for f in ${funs[@]}; do
 	export -f $f
 done
