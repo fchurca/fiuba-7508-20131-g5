@@ -116,25 +116,20 @@ Perl versión: $version"
 
 #Definir espacio mínimo de disco requerido
 defineMinimumDiskSpace() {
-	local end=0
+	local end=false
 	echo "Defina el espacio mínimo libre para el arribo de archivos externos en MBytes ($DATASIZE):"
-	while [ $end -eq 0 ]
+	while ! $end
 	do
-		read DATASIZE
-		if [ ! -z "${DATASIZE##*[!0-9]*}" ]
+		getIntAnswer DATASIZE
+		local size=$(df -m ${HOME} | tail -1 | awk {'print $2'})
+		if [ $DATASIZE -gt $size ]
 		then
-			local size=$(df -m ${HOME} | tail -1 | awk {'print $2'})
-			if [ $DATASIZE -gt $size ]
-			then
-				echo "Insuficiente espacio en disco.
+			echo "Insuficiente espacio en disco.
 Espacio disponible: $size MB
 Espacio requerido $DATASIZE MB
 Cancele la instalación e intentelo más tarde o vuelva a intentarlo con otro valor."
-			else
-				end=1
-			fi
 		else
-			echo "Por favor, ingrese un número entero."
+			end=true
 		fi
 	done
 }
@@ -236,17 +231,7 @@ installationConfiguration() {
 	echo "Defina la extensión para los archivos de log ($LOGEXT):"
 	read LOGEXT
 	echo "Defina el tamaño máximo para los archivos $LOGEXT en Kbytes ($LOGSIZE):"
-	end=0
-	while [ $end -eq 0 ]
-	do
-		read LOGSIZE
-		if [ ! -z "${LOGSIZE##*[!0-9]*}" ]
-		then
-			end=1
-		else
-			echo "Por favor, ingrese un número entero."
-		fi
-	done
+	getIntAnswer LOGSIZE
 }
 
 #Reemplazar si existe el dato de configuración sino grabarlo

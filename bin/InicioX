@@ -136,11 +136,9 @@ GlogVInicioX "Todos los comandos OK"
 
 #### Exporto variables de entorno
 echo "Cantidad de iteraciones para DetectaX?"
-getIntAnswer
-CANLOOP=$?
+getIntAnswer CANLOOP
 echo "Tiempo en segundos entre iteraciones?"
-getIntAnswer
-TESPERA=$?
+getIntAnswer TESPERA
 
 GlogVInicioX "Exportando variables de entorno:"
 confvars+=('CANLOOP' 'TESPERA' 'PATH' 'CONFDIR' 'grupo')
