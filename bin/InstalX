@@ -77,16 +77,6 @@ printInstalationData() {
 	echo "Estado de la instalación: LISTA"
 }
 
-#Obtener respuesta Sí o No
-getYesOrNoAnswer() {
-	answer=
-	while [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]
-	do
-		read answer
-		answer=$(echo $answer | tr [:upper:] [:lower:])
-	done
-}
-
 #Términos y condiciones
 termsAndConditions() {
 	echo 'TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05

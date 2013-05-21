@@ -1,3 +1,4 @@
+#! /usr/bin/make -f
 instalador:
 	rm -rf 7508-20131-g5 7508-20131-g5.tar.gz
 	mkdir 7508-20131-g5
