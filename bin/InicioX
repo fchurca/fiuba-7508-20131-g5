@@ -43,13 +43,13 @@ for var in ${confvars[@]}; do
 	eval "if [ -z \${${var}} ]; then badvars+=('${var}'); fi"
 done
 
-if [ ${badvars}x == x ]; then
+if [ -z ${badvars} ]; then
 	echo "Variables OK: ${confvars[@]}" >&2
 	baddirs=()
 	for dir in ${confdirs[@]}; do
 		eval "if [ ! -d \${${dir}} -o ! -r \${${dir}} ]; then baddirs+=('${dir}'); fi"
 	done
-	if [ ${baddirs}x != x ]; then
+	if [ ! -z ${baddirs} ]; then
 		echo "Los siguientes directorios no están accesibles, no se puede continuar:" >&2
 		echo "${baddirs[@]}" >&2
 		return 1
@@ -65,11 +65,14 @@ if ! ${preinicializado}; then
 fi
 export LOGDIR
 export LOGEXT
+function XGlogX {
+GlogX InicioX "$1" "$2"
+}
 
 # Ahora sí podemos loguear a GlogX
-GlogX InicioX 'Inicio de Ejecución'
-GlogX InicioX "LOGDIR=${LOGDIR}"
-GlogX InicioX "LOGEXT=${LOGEXT}"
+XGlogX 'Inicio de Ejecución'
+XGlogX "LOGDIR=${LOGDIR}"
+XGlogX "LOGEXT=${LOGEXT}"
 
 #### Verificación de instalación
 ## Verificación de comandos
@@ -94,12 +97,12 @@ done
 echo "Comandos registrados:" >&2
 echo ${comandos[@]} >&2
 if [ ! -z ${comandosNoEjecutables} ]; then
-	GlogX InicioX "Comandos no ejecutables: ${comandosNoEjecutables[@]}"
+	XGlogX "Comandos no ejecutables: ${comandosNoEjecutables[@]}"
 	echo "Comandos no ejecutables: ${comandosNoEjecutables[@]}" >&2
 fi
 # Comandos faltantes
 if [ ! -z ${comandosFaltantes} ]; then
-	GlogX InicioX "Faltan los siguientes comandos, no se puede continuar: ${comandosFaltantes[@]}"
+	XGlogX "Faltan los siguientes comandos, no se puede continuar: ${comandosFaltantes[@]}"
 	echo "Faltan los siguientes comandos, no se puede continuar: ${comandosFaltantes[@]}" >&2
 	return 1
 	# Arreglo de permisos
@@ -107,22 +110,22 @@ elif [ ! -z ${comandosNoEjecutables} ]; then
 	echo "Desea hacerlos ejecutables? (sí/no)" >&2
 	getYesOrNoAnswer
 	if [ ${answer} = si ]; then
-		GlogX InicioX "Cambiando permisos..."
+		XGlogX "Cambiando permisos..."
 		echo Cambiando permisos... >&2
 		bad=()
 		for c in ${comandosNoEjecutables[@]}; do
 			f="${BINDIR}/$c"
-			if chmod gu+x $f 2>/dev/null; then
-				GlogX InicioX "OK: $c"
+			if chmod +x $f 2>/dev/null; then
+				XGlogX "OK: $c"
 				echo OK: $c >&2
 			else
-				GlogX InicioX "KO: $c"
+				XGlogX "KO: $c"
 				echo KO: $c >&2
 				bad+=($c)
 			fi
 		done
 		if [ ! -z ${bad} ]; then
-			GlogX InicioX "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}"
+			XGlogX "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}"
 			echo "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}" >&2
 			return 3
 		fi
@@ -130,15 +133,14 @@ elif [ ! -z ${comandosNoEjecutables} ]; then
 		return 2
 	fi
 fi
-GlogX InicioX "Todos los comandos OK"
+XGlogX "Todos los comandos OK"
 echo "Todos los comandos OK" >&2
+
 ####TODO: Verificar archivos maestros
 # Existan legibles
 
 ####TODO: Verificar tablas de configuración
 # Existan legibles
-
-####TODO: Fallar si el entorno está inicializado
 
 #### Exporto variables de entorno
 echo "Cantidad de iteraciones para DetectaX?"
@@ -148,27 +150,27 @@ echo "Tiempo en segundos entre iteraciones?"
 getIntAnswer
 TESPERA=$?
 
-GlogX InicioX "Exportando variables de entorno:"
+XGlogX "Exportando variables de entorno:"
 echo "Exportando variables de entorno:" >&2
 confvars+=('CANLOOP' 'TESPERA' 'PATH' 'CONFDIR' 'grupo')
 for var in ${confvars[@]}; do
 	eval "export ${var}"
 	eval "echo ${var}=\${${var}}"
-	eval 'GlogX InicioX "'${var}'=${'${var}'}"'
+	eval 'XGlogX "'${var}'=${'${var}'}"'
 done
 
-GlogX InicioX "Variables de entorno exportadas"
+XGlogX "Variables de entorno exportadas"
 echo "Variables de entorno exportadas" >&2
 
 #### Ejecución de DetectaX
 echo "Desea efectuar la activación de DetectaX? (sí/no)"
 getYesOrNoAnswer
 if [ "${answer}" = si ]; then
-	GlogX InicioX "Iniciando DetectaX"
+	XGlogX "Iniciando DetectaX"
 	echo "Iniciando DetectaX"
 	StartX DetectaX
 else
-	GlogX InicioX "DetectaX no iniciado"
+	XGlogX "DetectaX no iniciado"
 	echo "DetectaX no iniciado"
 fi
 
