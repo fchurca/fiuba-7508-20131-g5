@@ -22,8 +22,13 @@ while [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]; do
 done
 }
 
+function curryGlogX {
+eval 'function Glog'$1' { GlogX '$1' "$1" "$2"; }'
+eval 'function GlogV'$1' { Glog'$1' "$1" "$2"; echo "$1" >&2; }'
+}
+
 # Exportamos las funciones
-funs=(getIntAnswer getYesOrNoAnswer)
+funs=(getIntAnswer getYesOrNoAnswer curryGlogX)
 for f in ${funs[@]}; do
 	export -f $f
 done
