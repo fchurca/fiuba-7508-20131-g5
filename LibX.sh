@@ -13,18 +13,18 @@ return $ans
 }
 
 # Obtener respuesta Sí o No
-# Ponemos la respuesta en $answer porque no podemos devolver strings
-#TODO: Tal vez sea mejor recibir el nombre de la variable por $1 y hacer eval "read $1"
+# $1 debe llevar el nombre de la variable de retorno
 function getYesOrNoAnswer {
-answer=
-while [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]; do
-	read answer
+local __answer__=
+while [ \( "$__answer__" != "si" \) -a \( "$__answer__" != "no" \) ]; do
+	read __answer__
 	# tr trabaja de a bytes, y, aunque funciona así, posiblemente sea mejor cambiar eso con un sed: sed 's/[[:upper:]]*/\L&/;s/í/i/g'
-	answer=$(tr [:upper:]Íí [:lower:]ii <<< $answer)
-	if [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]; then
+	__answer__=$(tr [:upper:]Íí [:lower:]ii <<< $__answer__)
+	if [ \( "$__answer__" != "si" \) -a \( "$__answer__" != "no" \) ]; then
 		echo "Por favor responda sí o no"
 	fi
 done
+eval "$1=${__answer__}"
 }
 
 # Crear funciones de logging cortas

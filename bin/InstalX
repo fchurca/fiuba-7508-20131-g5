@@ -82,7 +82,7 @@ termsAndConditions() {
 	echo 'TP SO7508 Primer Cuatrimestre 2013. Tema X Copyright © Grupo 05
 A T E N C I O N: Al instalar TP SO7508 Primer Cuatrimestre 2013 UD. expresa aceptar los términos y condiciones del "ACUERDO DE LICENCIA DE SOFTWARE" incluido en este paquete.
 ¿Acepta? Si - No'
-	getYesOrNoAnswer
+	getYesOrNoAnswer answer
 }
 
 #Verificar que Perl esté instalado
@@ -360,7 +360,7 @@ then
 	else
 		printPreviousInstalationData INCOMPLETA
 		echo "¿Desea completar la instalación? Si - No"
-		getYesOrNoAnswer
+		getYesOrNoAnswer answer
 		if [ "$answer" = "si" ]
 		then
 			verifyPerlIsInstalled
@@ -371,7 +371,7 @@ then
 				clear
 				printInstalationData
 				echo 'Iniciando Instalación. ¿Está Ud. seguro? Si - No'
-				getYesOrNoAnswer
+				getYesOrNoAnswer answer
 				if [ "$answer" = "si" ]
 				then
 					installationProcess
@@ -394,7 +394,7 @@ else
 				clear
 				printInstalationData
 				echo '¿Desea continuar con la instalación? Si - No'
-				getYesOrNoAnswer
+				getYesOrNoAnswer answer
 				if [ "$answer" = "si" ]
 				then
 					configured=1
@@ -404,7 +404,7 @@ else
 				fi
 			done
 			echo 'Iniciando Instalación. ¿Está Ud. seguro? Si - No'
-			getYesOrNoAnswer
+			getYesOrNoAnswer answer
 			if [ "$answer" = "si" ]
 			then
 				installationProcess
