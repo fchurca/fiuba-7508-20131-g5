@@ -34,6 +34,7 @@ if [ ! -f ${CONFFILE} ]; then
 fi
 
 confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR')
+#TODO: verificar que LOGSIZE y DATASIZE sean enteros no-nulos
 confvars=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR' 'LOGEXT' 'LOGSIZE' 'DATASIZE')
 badvars=()
 for var in ${confvars[@]}; do

@@ -1,3 +1,6 @@
+#
+
+# Obtener respuesta entero
 function getIntAnswer {
 local ans=
 while [ -z "${ans##*[!0-9]*}" ]; do
@@ -9,7 +12,9 @@ done
 return $ans
 }
 
-#Obtener respuesta Sí o No
+# Obtener respuesta Sí o No
+# Ponemos la respuesta en $answer porque no podemos devolver strings
+#TODO: Tal vez sea mejor recibir el nombre de la variable por $1 y hacer eval "read $1"
 function getYesOrNoAnswer {
 answer=
 while [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]; do
@@ -22,6 +27,7 @@ while [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]; do
 done
 }
 
+# Crear funciones de logging cortas
 function curryGlogX {
 eval 'function Glog'$1' { GlogX '$1' "$1" "$2"; }'
 eval 'function GlogV'$1' { Glog'$1' "$1" "$2"; echo "$1" >&2; }'
