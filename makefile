@@ -1,10 +1,12 @@
 #! /usr/bin/make -f
-instalador:
-	rm -rf 7508-20131-g5 7508-20131-g5.tar.gz
+instalador: clean
 	mkdir 7508-20131-g5
-	cp bin/* LibX.sh README 7508-20131-g5
-	chmod +x 7508-20131-g5/*
+	chmod +x bin/*
+	cp bin/* mae/*.mae conf/*.tab LibX.sh README 7508-20131-g5
 	tar czf 7508-20131-g5.tar.gz 7508-20131-g5/*
 	rm -rf 7508-20131-g5
 
-.PHONY: instalador
+clean:
+	rm -rf 7508-20131-g5 7508-20131-g5.tar.gz
+
+.PHONY: instalador clean

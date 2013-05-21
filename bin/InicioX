@@ -5,16 +5,23 @@
 # O al menos ofrecer la posibilidad de entrar en una sesión interactiva
 
 # Desde acá loguear a stderr
-if [ "$1"x == -dx ]; then
-	grupo=`pwd` # debug
+if [ -z ${grupo} ]; then
+	if [ "$1"x == -dx ]; then
+		grupo=`pwd` # debug
+	else
+		grupo="${HOME}/7508-20131-g5" # real
+	fi
+	preinicializado=false
 else
-	grupo="${HOME}/7508-20131-g5" # real
+	echo "ControlX ya está inicializado, sólo se verificará el entorno" >&2
+	#TODO: -f para cargar configuración de todas formas?
+	preinicializado=true
 fi
 
 LIB=${grupo}/LibX.sh
 if [ ! -r ${LIB} ]; then
 	echo "Biblioteca no encontrada, no se puede continuar: ${LIB}" >&2
-	return 1;
+	return 1
 fi
 source ${LIB}
 
@@ -23,19 +30,21 @@ CONFFILE=${CONFDIR}/InstalX.conf
 if [ ! -f ${CONFFILE} ]; then
 	echo "Falta el archivo de configuración, no se puede continuar:" >&2
 	echo ${CONFFILE} >&2
-	return 1;
+	return 1
 fi
 
-BINDIR=
 confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR')
 confvars=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR' 'LOGEXT' 'LOGSIZE' 'DATASIZE')
 badvars=()
 for var in ${confvars[@]}; do
-	eval `grep "^${var}=" ${CONFFILE} | cut -d= -f1,2`
+	if ! ${preinicializado}; then
+		eval `grep "^${var}=" ${CONFFILE} | cut -d= -f1,2`
+	fi
 	eval "if [ -z \${${var}} ]; then badvars+=('${var}'); fi"
 done
 
 if [ ${badvars}x == x ]; then
+	echo "Variables OK: ${confvars[@]}" >&2
 	baddirs=()
 	for dir in ${confdirs[@]}; do
 		eval "if [ ! -d \${${dir}} -o ! -r \${${dir}} ]; then baddirs+=('${dir}'); fi"
@@ -45,12 +54,15 @@ if [ ${badvars}x == x ]; then
 		echo "${baddirs[@]}" >&2
 		return 1
 	fi
+	echo "Directorios OK: ${confdirs[@]}" >&2
 else
 	echo "Las siguientes variables no están definidas, no se puede continuar:" >&2
 	echo "${badvars[@]}" >&2
 	return 1
 fi
-PATH+=":${BINDIR}"
+if ! ${preinicializado}; then
+	PATH+=":${BINDIR}"
+fi
 export LOGDIR
 export LOGEXT
 
@@ -61,7 +73,7 @@ GlogX InicioX "LOGEXT=${LOGEXT}"
 
 #### Verificación de instalación
 ## Verificación de comandos
-comandos=('InicioX' 'DetectaX' 'StartX' 'StopX' 'InterpreteX' 'MoverX' 'GlogX' 'VlogX') # 'ReporteX'
+comandos=('InicioX' 'DetectaX' 'StartX' 'StopX' 'InterpreteX' 'MoverX' 'GlogX' 'VlogX' 'ReporteX')
 comandosFaltantes=()
 comandosNoEjecutables=()
 comandosOk=()
