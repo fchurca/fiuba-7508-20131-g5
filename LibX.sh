@@ -11,7 +11,6 @@ return $ans
 
 #Obtener respuesta Sí o No
 function getYesOrNoAnswer {
-# Reemplazar por return cuando podamos refactorear
 answer=
 while [ \( "$answer" != "si" \) -a \( "$answer" != "no" \) ]; do
 	read answer
