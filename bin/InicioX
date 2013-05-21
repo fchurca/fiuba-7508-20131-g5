@@ -31,17 +31,15 @@ confdirs=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'L
 confvars=('BINDIR' 'MAEDIR' 'ARRIDIR' 'ACEPDIR' 'RECHDIR' 'PROCDIR' 'REPODIR' 'LOGDIR' 'LOGEXT' 'LOGSIZE' 'DATASIZE')
 badvars=()
 for var in ${confvars[@]}; do
-	== `grep "^${var}=" ${CONFFILE} | cut -d= -f1,2`
-	== "if [ \${${var}}x == x ]; then badvars+=('${var}'); fi"
+	eval `grep "^${var}=" ${CONFFILE} | cut -d= -f1,2`
+	eval "if [ -z \${${var}} ]; then badvars+=('${var}'); fi"
 done
-=!
 
 if [ ${badvars}x == x ]; then
 	baddirs=()
 	for dir in ${confdirs[@]}; do
-		== "if [ ! -d \${${dir}} -o ! -r \${${dir}} ]; then baddirs+=('${dir}'); fi"
+		eval "if [ ! -d \${${dir}} -o ! -r \${${dir}} ]; then baddirs+=('${dir}'); fi"
 	done
-	=!
 	if [ ${baddirs}x != x ]; then
 		echo "Los siguientes directorios no están accesibles, no se puede continuar:" >&2
 		echo "${baddirs[@]}" >&2
@@ -83,20 +81,20 @@ done
 ## Reporte de situación
 echo "Comandos registrados:" >&2
 echo ${comandos[@]} >&2
-if [ "${comandosNoEjecutables}x" != 'x' ]; then
+if [ ! -z ${comandosNoEjecutables} ]; then
 	GlogX InicioX "Comandos no ejecutables: ${comandosNoEjecutables[@]}"
 	echo "Comandos no ejecutables: ${comandosNoEjecutables[@]}" >&2
 fi
 # Comandos faltantes
-if [ "${comandosFaltantes}x" != 'x' ]; then
+if [ ! -z ${comandosFaltantes} ]; then
 	GlogX InicioX "Faltan los siguientes comandos, no se puede continuar: ${comandosFaltantes[@]}"
 	echo "Faltan los siguientes comandos, no se puede continuar: ${comandosFaltantes[@]}" >&2
 	return 1
 	# Arreglo de permisos
-elif [ "${comandosNoEjecutables}x" != 'x' ]; then
-	echo "Desea hacerlos ejecutables? (s/N)" >&2
-	read ans
-	if [ "${ans}x" == sx -o "${ans}x" == Sx ]; then
+elif [ ! -z ${comandosNoEjecutables} ]; then
+	echo "Desea hacerlos ejecutables? (sí/no)" >&2
+	getYesOrNoAnswer
+	if [ ${answer} = si ]; then
 		GlogX InicioX "Cambiando permisos..."
 		echo Cambiando permisos... >&2
 		bad=()
@@ -111,7 +109,7 @@ elif [ "${comandosNoEjecutables}x" != 'x' ]; then
 				bad+=($c)
 			fi
 		done
-		if [ "${bad}x" != "x" ]; then
+		if [ ! -z ${bad} ]; then
 			GlogX InicioX "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}"
 			echo "No se pueden hacer ejecutables los siguientes comandos: ${bad[@]}" >&2
 			return 3
@@ -142,11 +140,10 @@ GlogX InicioX "Exportando variables de entorno:"
 echo "Exportando variables de entorno:" >&2
 confvars+=('CANLOOP' 'TESPERA' 'PATH' 'CONFDIR' 'grupo')
 for var in ${confvars[@]}; do
-	== "export ${var}"
-	== "echo ${var}=\${${var}}"
-	== 'GlogX InicioX "'${var}'=${'${var}'}"'
+	eval "export ${var}"
+	eval "echo ${var}=\${${var}}"
+	eval 'GlogX InicioX "'${var}'=${'${var}'}"'
 done
-=!
 
 GlogX InicioX "Variables de entorno exportadas"
 echo "Variables de entorno exportadas" >&2

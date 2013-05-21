@@ -1,25 +1,9 @@
-#TODO: VER CÓMO SE PUEDE HACER CON FIFOs
-function == {
-if [ ${CONTROLX_TMPFILE}x == x ]; then
-	CONTROLX_TMPFILE=`mktemp`
-fi
-echo $1 >> ${CONTROLX_TMPFILE}
-}
-
-function =! {
-if [ ${CONTROLX_TMPFILE}x != x ]; then
-	source ${CONTROLX_TMPFILE}
-	rm ${CONTROLX_TMPFILE}
-	CONTROLX_TMPFILE=
-fi
-}
-
 function getIntAnswer {
 local ans=
 while [ -z "${ans##*[!0-9]*}" ]; do
 	read ans
 	if [ -z "${ans##*[!0-9]*}" ]; then
-		echo "Por favor, ingrese un número entero"
+		echo "Por favor ingrese un número entero"
 	fi
 done
 return $ans
@@ -40,7 +24,7 @@ done
 }
 
 # Exportamos las funciones
-funs=(== =! getIntAnswer getYesOrNoAnswer)
+funs=(getIntAnswer getYesOrNoAnswer)
 for f in ${funs[@]}; do
 	export -f $f
 done

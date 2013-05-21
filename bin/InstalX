@@ -350,10 +350,9 @@ then
 	badvars=()
 	for var in ${confvars[@]}
 	do
-		== `grep "^${var}=" "$CONFDIR/$INSTALXCONF" | cut -d= -f1,2`
-		== "if [ \${${var}}x == x ]; then badvars+=('${var}'); fi"
+		eval `grep "^${var}=" "$CONFDIR/$INSTALXCONF" | cut -d= -f1,2`
+		eval "if [ \${${var}}x == x ]; then badvars+=('${var}'); fi"
 	done
-	=!
 	if [ ${badvars}x == x ]
 	then
 		printPreviousInstalationData COMPLETA
