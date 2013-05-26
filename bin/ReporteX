@@ -1,25 +1,19 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 ########## Comando ReporteX.pl  ##########
 ########## Consultas y Reportes ##########
 
 
 # Verificacion de inicializacion de ambiente
-
-# TODO: para pruebas locales en WIN. ELIMINAR
-#$maedir = "C:/Users/pivancic/Desktop/so/datos/";
-#$procdir = "C:/Users/pivancic/Desktop/so/datos/";
-#$repodir = "C:/Users/pivancic/Desktop/so/datos/";
-
 # TODO: para pruebas locales en MINT. ELIMINAR
-#$maedir = $ENV{"HOME"}."/7508/archivos-test";
-#$procdir = $ENV{"HOME"}."/7508/archivos-test";
-#$repodir = $ENV{"HOME"}."/7508/archivos-test";
+$maedir = $ENV{"HOME"}."/7508/archivos-test";
+$procdir = $ENV{"HOME"}."/7508/archivos-test";
+$repodir = $ENV{"HOME"}."/7508/archivos-test";
 
 # TODO: para tp. DESCOMENTAR
-$maedir = $ENV{"MAEDIR"};
-$procdir = $ENV{"PROCDIR"};
-$repodir = $ENV{"REPODIR"};
+#$maedir = $ENV{"MAEDIR"};
+#$procdir = $ENV{"PROCDIR"};
+#$repodir = $ENV{"REPODIR"};
 
 if(!$maedir || !$procdir || !$repodir) {
    print "Las variables de ambiente no estan inicializadas. Se cortara la ejecucion del comando. \n";
@@ -408,8 +402,12 @@ while($consultar eq 'S') {
 			$entradaPPI = $ppiArray[$ind];
 			$entradaPrestamos = $prestamosArray[$ind];
 			
+			($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)=localtime;
+			$fecha = "$mday/$mon/$year";
+			$user = getlogin();
+			
 			$rep = "CODPRES;CODCLI;ECM;ECP;RESTM;RESTP;RECOMENDACION";
-			$rec = "SIS_ID;CTB_ANIO;CTB_MES;CTB_DIA;CTB_ESTADO;PRES_ID;MT_PRES;MT_IMPAGO;MT_INDE;MT_INNODE;MT_DEB;MT_REST;PRES_CLI_ID;PRES_CLI;INS_FE;INS_USER";
+			$rec = "SIS_ID;CTB_ANIO;CTB_MES;CTB_DIA;CTB_ESTADO;PRES_ID;MT_PRES;MT_IMPAGO;MT_INDE;MT_INNODE;MT_DEB;MT_REST;PRES_CLI_ID;PRES_CLI;$fecha;$user";
 			
 			$ecm = "";
 			$ecp = "";
