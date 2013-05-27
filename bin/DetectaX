@@ -3,29 +3,28 @@
 ### VARIABLES ###
 
 CICLE=0
-
+curryGlogX DetectaX
 
 #######################################################
-
 
 ### FUNCIONES ###
 
 #Procesar un archivo de ARRIDIR.
 processArridirFile() {
 	local rejected=0;
-	if [ -f "$1" ]
+	escaped=`printf %q $file`
+	if [ -f "$escaped" -a -w "$escaped" ]
 	then
 		local file="${1##*/}"
 		local country="${file%%-*}"
 		local untilSystem="${file#*-}"
 		local system="${untilSystem%%-*}"
-		if [ \( -z "$country" \) -o \( -z "$system" \) ]
+		if [ -z "$country" -o -z "$system" ]
 		then
 			rejected=1
 		else
 			grep -q "$country-.*-$system" "$MAEDIR/p-s.mae"
-			local returnCode=$?
-			if [ $returnCode -ne 0 ]
+			if [ $? -ne 0 ]
 			then
 				rejected=1
 			else
@@ -56,11 +55,10 @@ processArridirFile() {
 	fi
 	if [ $rejected -eq 1 ]
 	then
-		source MoverX "$file" "$ARRIDIR" "$RECHDIR" 2> /dev/null
-		GlogX DetectaX "Ciclo: $CICLE. Archivo $file movido desde $ARRIDIR a $RECHDIR."
+		GlogDetectaX "Ciclo $CICLE: Archivo $file NO movido"
 	else
 		source MoverX "$file" "$ARRIDIR" "$ACEPDIR" 2> /dev/null
-		GlogX DetectaX "Ciclo: $CICLE. Archivo $file movido desde $ARRIDIR a $ACEPDIR."
+		GlogDetectaX "Ciclo $CICLE: Archivo $file movido de $ARRIDIR a $ACEPDIR"
 	fi
 }
 
@@ -69,25 +67,30 @@ processArridirFile() {
 
 
 ### BLOQUE PRINCIPAL ###
-
+GlogDetectaX 'Iniciando DetectaX'
 #Detectar si existen archivos en ARRIDIR.
-while [ $CICLE -le $CANLOOP ]
+while [ $CICLE -lt $CANLOOP ]
 do
 	((CICLE++))
 
 	if [ "$(ls -A "$ARRIDIR")" ]
 	then
-		IFS="
-"
-		for file in $(find "$ARRIDIR" -type f)
+		DONE=false
+		find "$ARRIDIR" -type f | until $DONE
 		do
-			processArridirFile "$file"
+			read file || DONE=true
+			[[ ! $file ]] && continue
+			processArridirFile $file
 		done
 	fi
 
 	if [ "$(ls -A "$ACEPDIR")" ]
 	then
+		GlogDetectaX 'Archivos hallados, iniciando InterpreteX'
 		StartX InterpreteX > /dev/null
+	else
+		GlogDetectaX 'Ningún archivo hallado'
 	fi
 	sleep $TESPERA
 done
+GlogDetectaX 'Finalizando DetectaX'
