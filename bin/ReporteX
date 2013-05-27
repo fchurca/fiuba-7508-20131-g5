@@ -6,14 +6,14 @@
 
 # Verificacion de inicializacion de ambiente
 # TODO: para pruebas locales en MINT. ELIMINAR
-$maedir = $ENV{"HOME"}."/7508/archivos-test";
-$procdir = $ENV{"HOME"}."/7508/archivos-test";
-$repodir = $ENV{"HOME"}."/7508/archivos-test";
+#$maedir = $ENV{"HOME"}."/7508/archivos-test";
+#$procdir = $ENV{"HOME"}."/7508/archivos-test";
+#$repodir = $ENV{"HOME"}."/7508/archivos-test";
 
 # TODO: para tp. DESCOMENTAR
-#$maedir = $ENV{"MAEDIR"};
-#$procdir = $ENV{"PROCDIR"};
-#$repodir = $ENV{"REPODIR"};
+$maedir = $ENV{"MAEDIR"};
+$procdir = $ENV{"PROCDIR"};
+$repodir = $ENV{"REPODIR"};
 
 if(!$maedir || !$procdir || !$repodir) {
    print "Las variables de ambiente no estan inicializadas. Se cortara la ejecucion del comando. \n";
@@ -266,7 +266,7 @@ while($consultar eq 'S') {
 	if($filtros{'SISTEMA_ID'} && $filtros{'SISTEMA_ID'} ne "") {
 		$sistema = $filtros{'SISTEMA_ID'}; 
 	}
-	
+
 	# Se lee el Archivo Maestro y se obtienen los registros del mismo filtrados
 	open(PPIFILE, $paths{"PPI"});
 	
@@ -275,12 +275,12 @@ while($consultar eq 'S') {
 		if($linea =~ m#($pais);($sistema);(\d+);(\d+);(\d+);(\w+);(\d\d/\d\d/\d\d\d\d);(\w+);(\w+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+)#) {
 		   # $1 PAIS_ID ; $2 SIS_ID ; $3 CTB_ANIO ; $4 CTB_MES ; $5 CTB_DIA ; $6 CTB_ESTADO ; $7 PRES_FE ; $8 PRES_ID ; $9 PRES_TI 
 		   # $10 MT_PRES ; $11 MT_IMPAGO ; $12 MT_INDE ; $13 MT_INNODE ; $14 MT_DEB
-		   
+
 		   $enFecha = "S";
 		   $anioLinea = $3;
 		   $mesLinea = $4;
-			# Se verifica para filtrar por fecha
-			if($filtros{"ANIO"} && $filtros{"ANIO"} ne "" && $filtros{"ANIO_HASTA"} && $filtros{"ANIO_HASTA"} ne "" && $filtros{"MES"} && $filtros{"MES"} ne "" && $filtros{"MES_HASTA"} && $filtros{"MES_HASTA"} ne "") {
+   		   # Se verifica para filtrar por fecha
+		   if($filtros{"ANIO"} && $filtros{"ANIO"} ne "" && $filtros{"ANIO_HASTA"} && $filtros{"ANIO_HASTA"} ne "" && $filtros{"MES"} && $filtros{"MES"} ne "" && $filtros{"MES_HASTA"} && $filtros{"MES_HASTA"} ne "") {
 				# Se definio un RANGO de busqueda por fecha
 				if($anioLinea >= $filtros{"ANIO"} && $anioLinea <= $filtros{"ANIO_HASTA"}) {
 					# Se encuentra en el rango de años
@@ -333,7 +333,7 @@ while($consultar eq 'S') {
 	}
 	
 	close(PPIFILE);
-	
+
 	########## 3ER PASO ##########
 	# Se leen todos los registros del Archivo de Prestamos y se comparan con los filtrados del Archivo Maestro
 	open(PRESTAMOS,$paths{"PRESTAMOS"}.$filtros{"PAIS_ID"});
@@ -351,12 +351,13 @@ while($consultar eq 'S') {
 			$diaPrestamo = 0;
 			$fechaGrabacion = "";
 			$encontroPrestamo = "N";
+
 			foreach $lineaPrestamos (@prestamosFileArray) {
-				if($lineaPrestamos =~ m#(\w+);($anioPrestamo);($mesPrestamo);(\d+);(\w+);($codPrestamo);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\w*);(.*);(\d\d/\d\d/\d\d\d\d);(\w*)#) {
+				if($lineaPrestamos =~ m#(\w+);($anioPrestamo);(\d+);(\d+);(\w+);($codPrestamo);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\d*,?\d+);(\w*);(.*);(\d\d/\d\d/\d\d\d\d);(\w*)# && $3 == $mesPrestamo) {
 				   #$1 SIS_ID ; $2 CTB_ANIO ; $3 CTB_MES ; $4 CTB_DIA ; $5 CTB_ESTADO ; $6 PRES_ID ; $7 MT_PRES ; $8 MT_IMPAGO ; $9 MT_INDE ; $10 MT_INNODE
 				   #$11 MT_DEB ; $12 MT_REST ; $13 PRES_CLI_ID ; $14 PRES_CLI ; $15 INS_FE ; $16 INS_USER
 				   $encontroPrestamo = "S";
-				   
+
 				   # Verifica que el dia sea mayor al anterior encontrado. Si el dia es igual, corrobora la fecha de grabacion
 				   if($4 >= $diaPrestamo) {
 				   	# TODO: Comparar por FECHA si dia de prestamos es el mismo
