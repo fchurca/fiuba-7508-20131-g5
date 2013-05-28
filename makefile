@@ -2,7 +2,7 @@
 instalador: clean
 	mkdir 7508-20131-g5
 	chmod +x bin/*
-	cp bin/* mae/*.mae conf/*.tab LibX.sh README 7508-20131-g5
+	cp -r bin/* mae/*.mae conf/*.tab LibX.sh README Corpus 7508-20131-g5
 	tar czf 7508-20131-g5.tar.gz 7508-20131-g5/*
 	rm -rf 7508-20131-g5
 
