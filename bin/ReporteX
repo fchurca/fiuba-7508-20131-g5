@@ -95,7 +95,14 @@ close(PSFILE);
 
 # Bucle principal del comando, donde se realizan consultas hasta que el usuario no desee seguir.
 $consultar = 'S';
-$it = 1;
+
+# Se obtiene la extension (numerica) siguiente para los archivos ReporteX.<xxx>
+if(opendir(REPODIR,$repodir)) {
+	@repoDir = readdir(REPODIR);
+	closedir(REPODIR);
+}
+$it = @repoDir - 2;
+
 while($consultar eq 'S') {
 
 	menu();	
@@ -536,7 +543,8 @@ while($consultar eq 'S') {
 
 	########## Se guarda el reporte, si corresponde ##########
 	if($filtros{"GUARDAR_CONSULTA"} eq "S") {
-		print "\nGuardando el reporte en $paths{'REPORTE'}.$it...\n";
+		$it++;
+		print "\nGuardando el reporte en $paths{'REPORTE'}$it...\n";
 	   	open(REPORTE,">".$paths{"REPORTE"}.$it);
 		
 		print REPORTE "Tipo de Consulta: $filtros{'TIPO_CONSULTA'}\n";
@@ -600,8 +608,6 @@ while($consultar eq 'S') {
 	$consultar = <STDIN>; 
 	chomp($consultar);
 	$consultar = uc($consultar);
-
-	$it++;
 }
 
 # Fin del comando, se limpia la terminal
