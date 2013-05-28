@@ -128,11 +128,62 @@ elif [ ! -z ${comandosNoEjecutables} ]; then
 fi
 GlogVInicioX "Todos los comandos OK"
 
-####TODO: Verificar archivos maestros
+####Verificar archivos maestros
 # Existan legibles
+maestros=('PPI.mae' 'p-s.mae')
+maestrosFaltantes=()
+maestrosNoLegibles=()
+maestrosOk=()
 
-####TODO: Verificar tablas de configuración
+for c in ${maestros[@]}; do
+	f="${MAEDIR}/$c"
+	if [ ! -f $f ]; then
+		maestrosFaltantes+=($c)
+	elif [ ! -r $f ]; then
+		maestrosNoLegibles+=($c)
+	else
+		maestrosOK+=($c)
+	fi
+done
+echo "Archivos maestros registrados: ${maestros[@]}" >&2
+if [ ! -z ${maestrosNoLegibles} ]; then
+	GlogVInicioX "Maestros no legibles, no se puede continuar: ${maestrosNoLegibles[@]}"
+	return 1
+fi
+if [ ! -z ${maestrosFaltantes} ]; then
+	GlogVInicioX "Faltan los siguientes maestros, no se puede continuar: ${maestrosFaltantes[@]}"
+	return 1
+fi
+GlogVInicioX "Todos los maestros OK"
+
+####Verificar tablas de configuración
 # Existan legibles
+tablas=('T1.tab' 'T2.tab')
+tablasFaltantes=()
+tablasNoLegibles=()
+tablasOk=()
+
+for c in ${tablas[@]}; do
+	f="${CONFDIR}/$c"
+	if [ ! -f $f ]; then
+		tablasFaltantes+=($c)
+	elif [ ! -r $f ]; then
+		tablasNoLegibles+=($c)
+	else
+		tablasOK+=($c)
+	fi
+done
+echo "Archivos de tabla registrados: ${tablas[@]}" >&2
+if [ ! -z ${tablasNoLegibles} ]; then
+	GlogVInicioX "Tablas no legibles, no se puede continuar: ${tablasNoLegibles[@]}"
+	return 1
+fi
+if [ ! -z ${tablasFaltantes} ]; then
+	GlogVInicioX "Faltan las siguientes tablas, no se puede continuar: ${tablasFaltantes[@]}"
+	return 1
+fi
+GlogVInicioX "Todas las tablas OK"
+
 
 #### Exporto variables de entorno
 echo "Cantidad de iteraciones para DetectaX?"
