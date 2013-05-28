@@ -98,5 +98,5 @@ then
 	done
 	GlogDetectaX 'Finalizando DetectaX'
 else
-	echo "Las variables de entorno no están inicializadas." > &2
+	echo "Las variables de entorno no están inicializadas." >&2
 fi
