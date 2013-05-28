@@ -5,7 +5,7 @@
 # y de dar error si el proceso no estaba ejecutándose.
 pid="`ps ax | grep -v grep | grep -v StopX | grep $1 | sed -r 's/^\s+(\S+)\s.*$/\1/'`"
 if [ "${pid}x" != x ]; then
-	kill $pid
+	kill $pid 2> /dev/null
 else
 	echo "Error: El proceso "$1" no se está ejecutando."
 	exit 1

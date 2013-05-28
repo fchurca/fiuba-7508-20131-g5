@@ -13,9 +13,10 @@ curryGlogX DetectaX
 processArridirFile() {
 	local rejected=0;
 	escaped=`printf %q $file`
+	local file="${file##*/}"
 	if [ -f "$escaped" -a -w "$escaped" ]
 	then
-		local file="${1##*/}"
+		#local file="${1##*/}"
 		local country="${file%%-*}"
 		local untilSystem="${file#*-}"
 		local system="${untilSystem%%-*}"
@@ -55,7 +56,8 @@ processArridirFile() {
 	fi
 	if [ $rejected -eq 1 ]
 	then
-		GlogDetectaX "Ciclo $CICLE: Archivo $file NO movido"
+		source MoverX "$file" "$ARRIDIR" "$RECHDIR" 2> /dev/null
+		GlogDetectaX "Ciclo $CICLE: Archivo $file movido de $ARRIDIR a $RECHDIR"
 	else
 		source MoverX "$file" "$ARRIDIR" "$ACEPDIR" 2> /dev/null
 		GlogDetectaX "Ciclo $CICLE: Archivo $file movido de $ARRIDIR a $ACEPDIR"
@@ -67,30 +69,34 @@ processArridirFile() {
 
 
 ### BLOQUE PRINCIPAL ###
-GlogDetectaX 'Iniciando DetectaX'
-#Detectar si existen archivos en ARRIDIR.
-while [ $CICLE -lt $CANLOOP ]
-do
-	((CICLE++))
+if [ -n "$grupo" ]
+then
+	GlogDetectaX 'Iniciando DetectaX'
+	while [ $CICLE -lt $CANLOOP ]
+	do
+		((CICLE++))
+		#Detectar si existen archivos en ARRIDIR.
+		if [ "$(ls -A "$ARRIDIR")" ]
+		then
+			DONE=false
+			find "$ARRIDIR" -type f | until $DONE
+			do
+				read file || DONE=true
+				[[ ! $file ]] && continue
+				processArridirFile $file
+			done
+		fi
 
-	if [ "$(ls -A "$ARRIDIR")" ]
-	then
-		DONE=false
-		find "$ARRIDIR" -type f | until $DONE
-		do
-			read file || DONE=true
-			[[ ! $file ]] && continue
-			processArridirFile $file
-		done
-	fi
-
-	if [ "$(ls -A "$ACEPDIR")" ]
-	then
-		GlogDetectaX 'Archivos hallados, iniciando InterpreteX'
-		StartX InterpreteX > /dev/null
-	else
-		GlogDetectaX 'Ningún archivo hallado'
-	fi
-	sleep $TESPERA
-done
-GlogDetectaX 'Finalizando DetectaX'
+		if [ "$(ls -A "$ACEPDIR")" ]
+		then
+			GlogDetectaX 'Archivos hallados, iniciando InterpreteX'
+			StartX InterpreteX > /dev/null
+		else
+			GlogDetectaX 'Ningún archivo hallado'
+		fi
+		sleep $TESPERA
+	done
+	GlogDetectaX 'Finalizando DetectaX'
+else
+	echo "Las variables de entorno no están inicializadas." > &2
+fi
